@@ -23,7 +23,7 @@ function App() {
 			connection
 				.start()
 				.then(() => {
-					console.log('Connected !');
+					console.log('App Connected!');
 					connection.on('messageReceived', (username: string, message: string) => {
 						console.log(username, message);
 					});
