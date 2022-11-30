@@ -23,7 +23,7 @@ function App() {
 			connection
 				.start()
 				.then(() => {
-					console.log('Dafna Connected!');
+					console.log('Dafna2 Connected!');
 					connection.on('messageReceived', (username: string, message: string) => {
 						console.log(username, message);
 					});
