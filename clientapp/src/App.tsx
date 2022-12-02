@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
 import { HubConnectionBuilder } from '@microsoft/signalr';
+import XO from './components/XO';
 
 const username = new Date().getTime();
 
@@ -37,7 +38,8 @@ function App() {
 	}
 	return (
 		<div className='App'>
-			<button onClick={send}>Send</button>
+			{/* <button onClick={send}>Send</button> */}
+			<XO />
 		</div>
 	);
 }

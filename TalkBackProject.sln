@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainApi", "MainApi\MainApi.csproj", "{7A9724D0-4351-464D-BE12-D435CEF6407E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MainApi", "MainApi\MainApi.csproj", "{7A9724D0-4351-464D-BE12-D435CEF6407E}"
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "clientapp", "ClientApp\clientapp.esproj", "{403016ED-6F81-4EF0-BD05-A1978C6331AA}"
 EndProject
