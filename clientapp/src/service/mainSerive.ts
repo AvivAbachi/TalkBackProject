@@ -9,11 +9,11 @@ class Connector {
 	static instance: Connector;
 	private connection: signalR.HubConnection;
 
-	public onPlayerTurn: (
-		onPlayTurn: (x: number, y: number, value: Turn, state: State) => void
+	public events: (
+		onPlayTurn: (x: number, y: number, value: Turn, state: State) => void,
+		onPlayerReset: (state: State) => void,
+		onPlayerReday: (state: State) => void
 	) => void;
-	public onPlayerReset: (onPlayerReset: (state: State) => void) => void;
-	public onPlayerReday: (onPlayerReday: (state: State) => void) => void;
 
 	constructor() {
 		this.connection = new signalR.HubConnectionBuilder()
@@ -23,22 +23,18 @@ class Connector {
 
 		this.connection.start().catch((err) => document.write(err));
 
-		this.onPlayerTurn = (onPlayTurn) => {
+		this.events = (onPlayerTurn, onPlayerReset, onPlayerReday) => {
 			this.connection.on(
 				'turnReceived',
 				function (x: number, y: number, value: Turn, state: State) {
-					onPlayTurn(x, y, value, state);
+					onPlayerTurn(x, y, value, state);
 				}
 			);
-		};
 
-		this.onPlayerReset = (onPlayerReset) => {
 			this.connection.on('resetReceived', function (state: State) {
 				onPlayerReset(state);
 			});
-		};
 
-		this.onPlayerReday = (onPlayerReday) => {
 			this.connection.on('readyReceived', function (state: State) {
 				onPlayerReday(state);
 			});

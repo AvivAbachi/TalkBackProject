@@ -2,16 +2,9 @@ import { useEffect, useState } from 'react';
 import Connector, { State, Turn } from '../service/mainSerive';
 
 export default function XO() {
-	const {
-		playerTurn,
-		playerReset,
-		playerReady,
-		onPlayerTurn,
-		onPlayerReset,
-		onPlayerReday,
-	} = Connector();
+	const { playerTurn, playerReset, playerReady, events } = Connector();
 
-	const [state, setState] = useState<State>();
+	const [state, setState] = useState<State>('Wait');
 	const [player, setPlayer] = useState('P1');
 
 	const [board, setBoard] = useState<Turn[][]>([
@@ -21,25 +14,25 @@ export default function XO() {
 	]);
 
 	useEffect(() => {
-		onPlayerTurn((x, y, value, state) => {
-			const upBoard = board;
-			upBoard[x][y] = value;
-			setBoard([...upBoard]);
-			setState(state);
-		});
-
-		onPlayerReday((state) => {
-			setState(state);
-		});
-
-		onPlayerReset((state) => {
-			setState(state);
-			setBoard([
-				['', '', ''],
-				['', '', ''],
-				['', '', ''],
-			]);
-		});
+		events(
+			(x, y, value, state) => {
+				const upBoard = board;
+				upBoard[x][y] = value;
+				setBoard([...upBoard]);
+				setState(state);
+			},
+			(state) => {
+				setState(state);
+				setBoard([
+					['', '', ''],
+					['', '', ''],
+					['', '', ''],
+				]);
+			},
+			(state) => {
+				setState(state);
+			}
+		);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -49,8 +42,7 @@ export default function XO() {
 			{board.map((row, x) => (
 				<div>
 					{row.map((value, y) => (
-						<button onClick={() => playerTurn(x, y, player)}>
-							{/* disabled={turn !== player} */}
+						<button onClick={() => playerTurn(x, y, player)} disabled={state !== player}>
 							{value}
 						</button>
 					))}

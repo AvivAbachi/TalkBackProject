@@ -1,14 +1,12 @@
-import React, { useEffect, useState } from 'react';
 import './App.css';
-import { HubConnectionBuilder } from '@microsoft/signalr';
-
+import Login from './components/login';
+import XO from './components/XO';
 
 function App() {
-	
 	return (
 		<div className='App'>
 			<Login></Login>
-
+			{/* <XO></XO> */}
 		</div>
 	);
 }
