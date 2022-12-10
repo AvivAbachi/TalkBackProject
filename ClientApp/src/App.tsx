@@ -1,8 +1,9 @@
 import { memo } from 'react';
-import { SimpleLogin } from './components/Login';
+import Login from './components/Login';
 import Game from './components/Game';
 import Home from './components/Home';
 import useTalkBackProject from './hooks/useTalkBackProject';
+import { HttpTransportType } from '@microsoft/signalr';
 
 function App() {
 	const {
@@ -13,17 +14,17 @@ function App() {
 		gameEvent,
 	} = useTalkBackProject();
 	return !user ? (
-		<SimpleLogin onSuccess={userEvent.handelLogin} />
+		<Login onSuccess={userEvent.handelLogin} />
 	) : (
 		<Provider
 			onOpen={loginEvent.onOpen}
 			onClosed={loginEvent.onClosed}
-			connectEnabled={!!user.userName}
-			dependencies={[user.userName]}
+			connectEnabled={!!user.token}
+			dependencies={[user.token]}
 			url='https://localhost:7025/hubs/lobby'
-			// accessTokenFactory={() => user?.token!}
-			// skipNegotiation={true}
-			// transport={HttpTransportType.WebSockets}
+			accessTokenFactory={() => user?.token!}
+			skipNegotiation
+			transport={HttpTransportType.WebSockets}
 		>
 			{!game ? (
 				<Home

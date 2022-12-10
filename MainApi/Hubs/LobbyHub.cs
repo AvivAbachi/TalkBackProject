@@ -1,9 +1,11 @@
 ﻿using MainApi.Models;
 using MainApi.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace MainApi.Hubs
 {
+    [Authorize]
     public class LobbyHub : Hub
     {
         private readonly IGamesService gamesService;
