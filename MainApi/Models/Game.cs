@@ -4,68 +4,88 @@ namespace MainApi.Models
 {
     public class Game
     {
-        private readonly Random random;
         public string GameId { get; set; }
-        public string Player1Id { get; set; }
-        public string Player2Id { get; set; }
-        public GameValue[,] Board { get; set; } = new GameValue[3, 3];
-        public GameStatus State { get; set; } = GameStatus.Wait;
-        public GameValue Turn { get; set; } = GameValue.X;
-
-        public Game(Random random, string gameId, string player1, string player2)
+        public Player Player1 { get; set; }
+        public Player Player2 { get; set; }
+        public Mark[] Board { get; set; } = new Mark[9];
+        public GameStatus GameState { get; set; } = GameStatus.Wait;
+        public Mark Turn { get; set; } = Mark.X;
+        public Game(string gameId, Player player1, Player player2)
         {
-            this.random = random;
-            this.GameId = gameId;
-            this.Player1Id = player1;
-            this.Player2Id = player2;
+            GameId = gameId;
+            Player1 = player1;
+            Player2 = player2;
         }
+    }
 
-        static public (bool, GameValue) PlayerTurn(Game game, int x, int y, string player)
+    static class GameHelpper
+    {
+        private static readonly Random random = new();
+
+        public static void Reset(this Game game)
         {
-            GameValue symbol = GameValue.None;
-            if (player == game.State.ToString())
+            game.GameState = GameStatus.Wait;
+            game.Turn = Mark.X;
+            game.Board = new Mark[9];
+        }
+        public static bool PlayerTurn(this Game game, string id, int i)
+        {
+            var player = game.Player1.ConnectionId == id ? GameStatus.P1 : GameStatus.P2;
+            if (player == game.GameState)
             {
-                if (game.Board[x, y] == GameValue.None)
+                if (game.Board[i] == Mark.None)
                 {
-                    game.Board[x, y] = game.Turn;
-                    if (!CheakWin(game.Board))
+                    game.Board[i] = game.Turn;
+                    if (!game.GameEnd())
                     {
-                        symbol = game.Turn;
-                        game.Turn = game.Turn == GameValue.X ? GameValue.Y : GameValue.X;
-                        game.State = game.State == GameStatus.P1 ? GameStatus.P2 : GameStatus.P1;
+                        game.Turn = game.Turn == Mark.X ? Mark.O : Mark.X;
+                        game.GameState = game.GameState == GameStatus.P1 ? GameStatus.P2 : GameStatus.P1;
                     }
-                }
-                return (true, symbol);
-            }
-            return (false, symbol);
-        }
 
-        static private bool CheakWin(GameValue[,] board)
-        {
+                    return true;
+                }
+            }
             return false;
         }
 
-        static public void Reset(Game game)
+        public static void PlayerReady(this Game game, string id)
         {
-            game.State = GameStatus.Wait;
-            game.Turn = GameValue.X;
-            game.Board = new GameValue[3, 3];
+            if (game.GameState != GameStatus.P1 || game.GameState != GameStatus.P2)
+            {
+                if (game.GameState == GameStatus.P2R && id == game.Player1.ConnectionId ||
+                    game.GameState == GameStatus.P1R && id == game.Player2.ConnectionId)
+                {
+                    game.Reset();
+                    game.GameState = (GameStatus)random.Next(3, 5);
+                }
+                else if (id == game.Player1.ConnectionId) game.GameState = GameStatus.P1R;
+                else if (id == game.Player2.ConnectionId) game.GameState = GameStatus.P2R;
+            }
         }
 
-        public void PlayerReady(string player)
+        private static bool GameEnd(this Game game)
         {
+            bool hasWin = (game.Board[0] == game.Turn && game.Board[1] == game.Turn && game.Board[2] == game.Turn) ||
+                          (game.Board[3] == game.Turn && game.Board[4] == game.Turn && game.Board[5] == game.Turn) ||
+                          (game.Board[6] == game.Turn && game.Board[7] == game.Turn && game.Board[8] == game.Turn) ||
+                          (game.Board[0] == game.Turn && game.Board[3] == game.Turn && game.Board[6] == game.Turn) ||
+                          (game.Board[1] == game.Turn && game.Board[4] == game.Turn && game.Board[7] == game.Turn) ||
+                          (game.Board[2] == game.Turn && game.Board[5] == game.Turn && game.Board[8] == game.Turn) ||
+                          (game.Board[0] == game.Turn && game.Board[4] == game.Turn && game.Board[8] == game.Turn) ||
+                          (game.Board[2] == game.Turn && game.Board[4] == game.Turn && game.Board[6] == game.Turn);
 
-            if (State == GameStatus.Wait || State == GameStatus.P1W ||
-                State == GameStatus.P2W || State == GameStatus.Darw)
+            if (hasWin)
             {
-                if (player == "P1") State = GameStatus.P1R;
-                if (player == "P2") State = GameStatus.P2R;
+                game.GameState = game.GameState == GameStatus.P1 ? GameStatus.P1W : GameStatus.P2W;
+                return true;
             }
-            else if (State == GameStatus.P2R && player == "P1" ||
-                    State == GameStatus.P1R && player == "P2")
+
+            foreach (var box in game.Board)
             {
-                State = (GameStatus)random.Next(3, 5);
+                if (box == Mark.None) return false;
             }
+            game.GameState = GameStatus.Darw;
+            return true;
         }
     }
 }

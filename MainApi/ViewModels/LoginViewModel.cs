@@ -6,7 +6,7 @@ namespace MainApi.ViewModels
     {
         [Required]
         [StringLength(60, MinimumLength = 2)]
-        public string Username { get; set; }
+        public string UserName { get; set; }
         [Required]
         [StringLength(60, MinimumLength = 3)]
         public string Password { get; set; }

@@ -1,22 +1,25 @@
 ﻿using MainApi.Models;
-using MainApi.Repositories;
 using MainApi.Service;
 using MainApi.ViewModels;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using NuGet.Protocol;
 
 namespace MainApi.Controllers
 {
-     [ApiController]
+    [ApiController]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService authService;
-        private readonly IUserRepository userRepository;
-        public AuthController(IAuthService authService, IUserRepository userRepository)
+        private readonly UserManager<Player> userManager;
+        private readonly SignInManager<Player> signInManager;
+
+        public AuthController(IAuthService authService, UserManager<Player> userManager, SignInManager<Player> signInManager)
         {
             this.authService = authService;
-            this.userRepository = userRepository;
+            this.userManager = userManager;
+            this.signInManager = signInManager;
         }
 
         [HttpGet("/")]
@@ -26,51 +29,50 @@ namespace MainApi.Controllers
         }
 
         [HttpPost("/Login")]
-        public ActionResult<AuthData> Login([FromBody] AuthViewModel model)
+        //[ValidateAntiForgeryToken]
+        public async Task<ActionResult<LoginData>> Login([FromBody] AuthViewModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var user = userRepository.GetSingle(u => u.Username == model.Username);
+            var result = await signInManager.PasswordSignInAsync(model.UserName, model.Password, false, false);
 
-            if (user == null)
+            if (result.Succeeded)
             {
-                return BadRequest(new { username = "no username not found" });
+                 var user = await userManager.FindByNameAsync(model.UserName);
+                return authService.CreateToken(user!);
             }
+            return BadRequest(new { username = "fail to login try again!" });
 
-            var passwordValid = authService.VerifyPassword(model.Password, user.Password);
-            if (!passwordValid)
-            {
-                return BadRequest(new { password = "invalid password" });
-            }
-
-            return authService.GetAuthData(user);
         }
 
         [HttpPost("/Register")]
-        public ActionResult<AuthData> Register([FromBody] AuthViewModel model)
+        public async Task<ActionResult<object>> Register([FromBody] AuthViewModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var usernameUniq = userRepository.IsUsernameUniq(model.Username);
-            if (!usernameUniq) return BadRequest(new { username = "user with this email already exists" });
 
-            var id = Guid.NewGuid().ToString();
             var user = new Player
             {
-                Id = id,
-                Username = model.Username,
-                Password = authService.HashPassword(model.Password)
+                UserName = model.UserName,
+                Status = Models.Abstract.PlayerStatus.Idle
             };
-            userRepository.Add(user);
-            userRepository.Commit();
 
-            return authService.GetAuthData(user);
+            var result = await userManager.CreateAsync(user, model.Password);
+
+            if (result.Succeeded)
+            {
+                return authService.CreateToken(user);
+            }
+
+            return BadRequest(result.Errors);
         }
 
         [Authorize]
         [HttpGet("/Test")]
-        public ActionResult Test()
+        public async Task<ActionResult<string>> Test()
         {
-            return Content("User Authorize");
+            var id = User.Identity?.Name;
+            var user = await userManager.FindByIdAsync(id!);
+            return user.ToJson();
         }
     }
 }

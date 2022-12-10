@@ -1,4 +1,7 @@
-﻿namespace MainApi.Models.Abstract
+﻿using System.Text.Json.Serialization;
+
+namespace MainApi.Models.Abstract
 {
-    public enum PlayerStatus { Wait, Ready, Turn }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum PlayerStatus { Idle, Ready, Play }
 }

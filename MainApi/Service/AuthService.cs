@@ -1,5 +1,4 @@
-﻿using CryptoHelper;
-using MainApi.Models;
+﻿using MainApi.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -16,39 +15,24 @@ namespace MainApi.Service
             this.jwtSecret = jwtSecret;
             this.jwtLifespan = jwtLifespan;
         }
-        public AuthData GetAuthData(Player player)
+        public LoginData CreateToken(Player player)
         {
-            var expirationTime = DateTime.UtcNow.AddSeconds(jwtLifespan);
-
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, player.Id) }),
-                Expires = expirationTime,// new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256Signature)
-                SigningCredentials = new SigningCredentials(
-                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
-                    SecurityAlgorithms.HmacSha256Signature
-                )
+                Expires = DateTime.UtcNow.AddSeconds(jwtLifespan),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)), SecurityAlgorithms.HmacSha256Signature)
             };
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
 
-            return new AuthData
+            return new LoginData
             {
-                Token = token,
-                TokenExpirationTime = ((DateTimeOffset)expirationTime).ToUnixTimeSeconds(),
+                Token = "Bearer " + token,
                 Id = player.Id,
-                Username= player.Username
+                UserName = player.UserName,
+                Status = player.Status,
             };
-        }
-
-        public string HashPassword(string password)
-        {
-            return Crypto.HashPassword(password);
-        }
-
-        public bool VerifyPassword(string password, string hashedPassword)
-        {
-            return Crypto.VerifyHashedPassword(hashedPassword, password);
         }
     }
 }
