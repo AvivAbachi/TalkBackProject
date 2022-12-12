@@ -5,12 +5,12 @@ namespace MainApi.Models
     public class Game
     {
         public string GameId { get; set; }
-        public Player Player1 { get; set; }
-        public Player Player2 { get; set; }
+        public IPlayerBase? Player1 { get; set; }
+        public IPlayerBase? Player2 { get; set; }
         public Mark[] Board { get; set; } = new Mark[9];
         public GameStatus GameState { get; set; } = GameStatus.Wait;
         public Mark Turn { get; set; } = Mark.X;
-        public Game(string gameId, Player player1, Player player2)
+        public Game(string gameId, IPlayerBase player1, IPlayerBase player2)
         {
             GameId = gameId;
             Player1 = player1;
@@ -30,7 +30,7 @@ namespace MainApi.Models
         }
         public static bool PlayerTurn(this Game game, string id, int i)
         {
-            var player = game.Player1.ConnectionId == id ? GameStatus.P1 : GameStatus.P2;
+            var player = game.Player1?.ConnectionId == id ? GameStatus.P1 : GameStatus.P2;
             if (player == game.GameState)
             {
                 if (game.Board[i] == Mark.None)
@@ -50,6 +50,7 @@ namespace MainApi.Models
 
         public static void PlayerReady(this Game game, string id)
         {
+
             if (game.GameState != GameStatus.P1 || game.GameState != GameStatus.P2)
             {
                 if (game.GameState == GameStatus.P2R && id == game.Player1.ConnectionId ||

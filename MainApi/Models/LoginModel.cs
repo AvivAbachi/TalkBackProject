@@ -1,14 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MainApi.ViewModels
+namespace MainApi.Models
 {
     public class AuthViewModel
     {
-        [Required]
-        [StringLength(60, MinimumLength = 2)]
+        [StringLength(60, MinimumLength = 6)]
         public string UserName { get; set; }
-        [Required]
-        [StringLength(60, MinimumLength = 3)]
+        [DataType(DataType.Password)]
+        [StringLength(60, MinimumLength = 6)]
         public string Password { get; set; }
     }
 }

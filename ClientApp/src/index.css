@@ -14,16 +14,19 @@ body {
 	gap: 0.5rem;
 	grid-template-columns: auto auto auto;
 }
+.board-active {
+	border-radius: 1rem;
+	box-shadow: 0 0 0 2px #3b71ca;
+}
 
 .board button {
-	height: 50px;
-	width: 50px;
+	height: 64px;
+	width: 64px;
 	border-radius: 0 !important;
-	padding: 0;
 }
-.board button:disabled {
+/* .board button:disabled {
 	opacity: 1;
-}
+} */
 .board button:nth-of-type(1) {
 	border-top-left-radius: 0.5rem !important;
 }
@@ -35,9 +38,4 @@ body {
 }
 .board button:nth-of-type(9) {
 	border-bottom-right-radius: 0.5rem !important;
-}
-
-.board-active {
-	border-radius: 1rem;
-	box-shadow: 0 0 0 2px #3b71ca;
 }

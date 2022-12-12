@@ -1,50 +1,15 @@
-import { memo } from 'react';
+import { memo, useContext } from 'react';
 import Login from './components/Login';
 import Game from './components/Game';
 import Home from './components/Home';
-import useTalkBackProject from './hooks/useTalkBackProject';
-import { HttpTransportType } from '@microsoft/signalr';
+import { TalkBackContext, TalkBackContextType } from './hooks/TalkBackContext';
 
 function App() {
 	const {
-		Provider,
-		state: { user, game, playerList },
-		loginEvent,
-		userEvent,
-		gameEvent,
-	} = useTalkBackProject();
-	return !user ? (
-		<Login onSuccess={userEvent.handelLogin} />
-	) : (
-		<Provider
-			onOpen={loginEvent.onOpen}
-			onClosed={loginEvent.onClosed}
-			connectEnabled={!!user.token}
-			dependencies={[user.token]}
-			url='https://localhost:7025/hubs/lobby'
-			accessTokenFactory={() => user?.token!}
-			skipNegotiation
-			transport={HttpTransportType.WebSockets}
-		>
-			{!game ? (
-				<Home
-					user={user}
-					playerList={playerList}
-					changeState={userEvent.changeState}
-					openGame={gameEvent.openGame}
-				/>
-			) : (
-				<Game
-					user={user}
-					game={game}
-					onReady={gameEvent.readyGame}
-					onReset={gameEvent.resetGame}
-					onLeave={gameEvent.leaveGame}
-					onTurn={gameEvent.turnGame}
-				/>
-			)}
-		</Provider>
-	);
+		state: { user, game },
+	} = useContext(TalkBackContext) as TalkBackContextType;
+
+	return !user ? <Login /> : !game ? <Home /> : <Game />;
 }
 
 export default memo(App);

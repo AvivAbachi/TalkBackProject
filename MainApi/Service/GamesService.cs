@@ -1,44 +1,43 @@
 ﻿using MainApi.Models;
 using MainApi.Models.Abstract;
-
+ 
 namespace MainApi.Service
 {
     public class GamesService : IGamesService
     {
         private static readonly GamesService instance = new();
         public static GamesService Instance => instance;
-        public List<Player> Players { get; } = new List<Player>();
+        public List<IPlayerBase> Players { get; } = new List<IPlayerBase>();
         public List<Game> Games { get; } = new List<Game>();
 
-        public Player? AddPlayer(string connectionId, string username)
+        public IPlayerBase? AddPlayer(IPlayerBase? player, string connectionId)
         {
-            Player? player = Players.SingleOrDefault(p => p?.ConnectionId == connectionId);
-            if (player == null)
+            if (player != null && !Players.Exists(p => p.ConnectionId == connectionId))
             {
-                player = new Player { ConnectionId = connectionId, UserName = username, Status = PlayerStatus.Idle };
                 Players.Add(player);
+                player.ConnectionId = connectionId;
                 return player;
             }
             return null;
         }
 
-        public Player? RemovePlayer(string connectionId)
+        public IPlayerBase? RemovePlayer(string connectionId)
         {
-            Player? player = Players.SingleOrDefault(p => p.ConnectionId == connectionId);
+            IPlayerBase? player = Players.SingleOrDefault(p => p.ConnectionId == connectionId);
             if (player != null) Players.Remove(player);
             return player;
         }
 
-        public Player? StatePlayer(string connectionId)
+        public IPlayerBase? StatePlayer(string connectionId)
         {
-            Player? player = Players.SingleOrDefault(p => p.ConnectionId == connectionId);
+            IPlayerBase? player = Players.SingleOrDefault(p => p.ConnectionId == connectionId);
             if (player != null) player.Status = player.Status == PlayerStatus.Idle ? PlayerStatus.Ready : PlayerStatus.Idle;
             return player;
         }
 
-        public Player? StatePlayer(string connectionId, PlayerStatus status)
+        public IPlayerBase? StatePlayer(string connectionId, PlayerStatus status)
         {
-            Player? player = Players.SingleOrDefault(p => p.ConnectionId == connectionId);
+            IPlayerBase? player = Players.SingleOrDefault(p => p.ConnectionId == connectionId);
             if (player != null) player.Status = status;
             return player;
         }

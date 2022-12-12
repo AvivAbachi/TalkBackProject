@@ -1,24 +1,22 @@
-import { memo, useMemo } from 'react';
-import { GameT, LoginStateType, MarkType } from '../types';
+import { memo, useMemo, useContext } from 'react';
+import { Button } from '@mui/material';
+import { TalkBackContext, TalkBackContextType } from '../hooks/TalkBackContext';
+import BoardButton from './BoardButton';
 
-interface GameProps {
-	user: LoginStateType;
-	game: GameT;
-	onReady?: () => void;
-	onReset?: () => void;
-	onTurn?: (i: number) => void;
-	onLeave?: () => void;
-}
+function Game() {
+	const {
+		state: { user, game },
+		gameEvent: { gameLeave, gameReady, gameReset, gameTurn },
+	} = useContext(TalkBackContext) as TalkBackContextType;
 
-function Game({ user, game, onReady, onReset, onTurn, onLeave }: GameProps) {
 	const player = useMemo(
-		() => (game.player1?.connectionId === user.connectionId ? 'P1' : 'P2'),
-		[game.player1?.connectionId, user.connectionId]
+		() => (game?.player1?.connectionId === user?.connectionId ? 'P1' : 'P2'),
+		[game?.player1?.connectionId, user?.connectionId]
 	);
-	const yourTurn = useMemo(() => game.gameState === player, [game.gameState, player]);
+	const yourTurn = useMemo(() => game?.gameState === player, [game?.gameState, player]);
 
 	const gameTitle = useMemo(() => {
-		switch (game.gameState) {
+		switch (game?.gameState) {
 			case 'P1R':
 			case 'P2R':
 				return game.gameState === player + 'R'
@@ -31,71 +29,46 @@ function Game({ user, game, onReady, onReset, onTurn, onLeave }: GameProps) {
 			case 'P2W':
 				return game.gameState === player + 'W' ? 'You Win' : 'You Lose';
 			default:
-				return game.gameState;
+				return game?.gameState;
 		}
-	}, [game.gameState, player]);
+	}, [game?.gameState, player]);
 
 	return (
 		<div className='game'>
 			<h1>Tic Tac Toe</h1>
 			<h2>{gameTitle}</h2>
 			<p>
-				{game.player1?.userName} vs {game.player2?.userName}
+				{game?.player1?.userName} vs {game?.player2?.userName}
 			</p>
 			<div className={'board' + (yourTurn ? ' board-active' : '')}>
-				{game.board.map((value, i) => (
+				{game?.board.map((value, i) => (
 					<BoardButton
 						key={i}
 						value={value}
 						disabled={!yourTurn}
-						onClick={() => onTurn?.(i)}
+						onClick={() => gameTurn?.(i)}
 					/>
 				))}
 			</div>
-			<button
-				className='btn btn-primary'
-				onClick={onReady}
+			<Button
+				color='primary'
 				disabled={
-					game.gameState === 'P1' ||
-					game.gameState === 'P2' ||
-					game.gameState === player + 'R'
+					game?.gameState === 'P1' ||
+					game?.gameState === 'P2' ||
+					game?.gameState === player + 'R'
 				}
+				onClick={gameReady}
 			>
 				Ready
-			</button>
-			<button className='btn btn-secondary mx-3' onClick={onLeave}>
+			</Button>
+			<Button color='secondary' className='mx-3' onClick={gameLeave}>
 				Leave
-			</button>
-			<button
-				className='btn btn-dark'
-				onClick={onReset}
-				disabled={game.gameState === 'Wait'}
-			>
+			</Button>
+			<Button color='error' onClick={gameReset} disabled={game?.gameState === 'Wait'}>
 				Reset
-			</button>
+			</Button>
 		</div>
 	);
 }
 
 export default memo(Game);
-
-interface BoardButtonProps {
-	onClick?: () => void;
-	value?: MarkType;
-	disabled?: boolean;
-}
-
-function BoardButton({ onClick, value, disabled }: BoardButtonProps) {
-	return (
-		<button
-			onClick={onClick}
-			className={
-				'btn ' +
-				(value === 'X' ? 'btn-success' : value === 'O' ? 'btn-danger' : 'btn-secondary')
-			}
-			disabled={disabled || value !== ''}
-		>
-			{value}
-		</button>
-	);
-}

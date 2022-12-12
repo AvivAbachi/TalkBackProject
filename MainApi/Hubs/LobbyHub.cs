@@ -1,6 +1,8 @@
 ﻿using MainApi.Models;
+using MainApi.Models.Abstract;
 using MainApi.Service;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 
 namespace MainApi.Hubs
@@ -9,19 +11,25 @@ namespace MainApi.Hubs
     public class LobbyHub : Hub
     {
         private readonly IGamesService gamesService;
-        public LobbyHub(IGamesService gamesService)
+        private readonly UserManager<Player> userManager;
+        public LobbyHub(IGamesService gamesService, UserManager<Player> userManager)
         {
             this.gamesService = gamesService;
+            this.userManager = userManager;
+
         }
 
-        public async Task PlayerLogin(string username)
+        public override async Task OnConnectedAsync()
         {
-            var player = gamesService.AddPlayer(Context.ConnectionId, username);
+            var dsa = Context.UserIdentifier;
+            IPlayerBase? player = await userManager.FindByIdAsync(Context.User?.Identity.Name);
+            player = gamesService.AddPlayer(player, Context.ConnectionId!);
             if (player != null)
             {
-                await Clients.Caller.SendAsync("onReceivedPlayers", gamesService.Players);
                 await Clients.Others.SendAsync("onPlayerLogin", player);
+                await Clients.Caller.SendAsync("onLogin", player, gamesService.Players);
             }
+            await base.OnConnectedAsync();
         }
 
         public override Task OnDisconnectedAsync(Exception? exception)
@@ -29,12 +37,12 @@ namespace MainApi.Hubs
             var player = gamesService.RemovePlayer(Context.ConnectionId);
             if (player != null)
             {
-                var game = gamesService.LeaveGame(Context.ConnectionId);
-                if (game != null)
-                {
-                    Groups.RemoveFromGroupAsync(Context.ConnectionId, game.GameId);
-                    Clients.Group(game.GameId).SendAsync("onGameSet", game);
-                }
+                //var game = gamesService.LeaveGame(Context.ConnectionId);
+                //if (game != null)
+                //{
+                //    Groups.RemoveFromGroupAsync(Context.ConnectionId, game.GameId);
+                //    Clients.Group(game.GameId).SendAsync("onGameSet", game);
+                //}
                 Clients.All.SendAsync("onPlayerLogout", player.ConnectionId);
             }
             return base.OnDisconnectedAsync(exception);
@@ -46,7 +54,7 @@ namespace MainApi.Hubs
             await Clients.All.SendAsync("onPlayerState", player);
         }
 
-        public async Task OpenGame(string p2Id)
+        public async Task GameOpen(string p2Id)
         {
             var game = gamesService.CrateGame(Context.ConnectionId, p2Id);
             if (game != null)
@@ -59,8 +67,9 @@ namespace MainApi.Hubs
             }
         }
 
-        public async Task LeaveGame(string gameId)
+        public async Task GameLeave(string gameId)
         {
+
             var game = gamesService.LeaveGame(Context.ConnectionId);
             if (game != null)
             {
@@ -70,7 +79,7 @@ namespace MainApi.Hubs
             }
         }
 
-        public async Task ResetGame(string gameId)
+        public async Task GameReset(string gameId)
         {
             var game = gamesService.Games.FirstOrDefault(g => g.GameId == gameId);
             if (game != null)
@@ -80,7 +89,7 @@ namespace MainApi.Hubs
             }
         }
 
-        public async Task PlayerReady(string gameId)
+        public async Task GameReady(string gameId)
         {
             var game = gamesService.Games.FirstOrDefault(g => g.GameId == gameId);
             if (game != null)
@@ -90,7 +99,7 @@ namespace MainApi.Hubs
             }
         }
 
-        public async Task PlayerTurn(string gameId, int i)
+        public async Task GameTurn(string gameId, int i)
         {
             var game = gamesService.Games.FirstOrDefault(g => g.GameId == gameId);
             var res = game?.PlayerTurn(Context.ConnectionId, i);

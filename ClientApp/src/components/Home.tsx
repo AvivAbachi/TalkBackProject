@@ -1,28 +1,42 @@
-import { memo } from 'react';
-import { LoginStateType, PlayerType } from '../types';
+import { Button, Divider, List, Typography } from '@mui/material';
+import { useContext, memo } from 'react';
+import { TalkBackContext, TalkBackContextType } from '../hooks/TalkBackContext';
+import UserListItem from './UserListItem';
 
-interface UsersProps {
-	user: LoginStateType;
-	playerList: PlayerType[];
-	changeState: () => void;
-	openGame: (p2Id: string | null) => void;
-}
+function Home() {
+	const {
+		state: { user, usersList },
+		userEvent: { changeState },
+		gameEvent: { gameOpen },
+	} = useContext(TalkBackContext) as TalkBackContextType;
 
-function Home({ user, playerList = [], changeState, openGame }: UsersProps) {
 	return (
 		<div>
-			User Page, {user.userName}
-			<ul>
-				{playerList.map((u) => (
-					<li key={u.connectionId}>
-						{u.userName} - {u.status}
-						{u.status === 'Ready' && u.connectionId !== user.connectionId && (
-							<button onClick={() => openGame(u.connectionId)}>Start Play</button>
-						)}
-					</li>
+			<Typography variant='h3' component='h1'>
+				User Page, {user?.userName}
+			</Typography>
+			<p>{user?.connectionId}</p>
+			<p>{user?.status}</p>
+			<Button
+				variant='contained'
+				color={user?.status === 'Ready' ? 'success' : 'secondary'}
+				onClick={changeState}
+			>
+				{user?.status === 'Ready' ? 'Ready to Play' : 'Not Ready'}
+			</Button>
+			<List>
+				<Divider variant='middle' component='li' />
+				{usersList?.map(({ connectionId, status, userName }) => (
+					<UserListItem
+						key={connectionId}
+						userName={userName}
+						connectionId={connectionId}
+						status={status}
+						onClick={gameOpen}
+						userId={user?.connectionId}
+					/>
 				))}
-			</ul>
-			<button onClick={changeState}>Ready?</button>
+			</List>
 		</div>
 	);
 }

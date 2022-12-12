@@ -1,62 +1,40 @@
-using MainApi.Hubs;
-using MainApi.Service;
 using MainApi.Context;
+using MainApi.Hubs;
 using MainApi.Models;
+using MainApi.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
 var connectionString = builder.Configuration["ConnectionStrings:DefaultConnection"];
-var jwtSecretKey = builder.Configuration["JwtSettings:SecretKey"];
-var jwtLifespan = builder.Configuration.GetValue<int>("JwtSettings:Lifespan");
+var jwtSettings = builder.Configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>()!;
 
 builder.Services.AddControllers();
-
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<IGamesService, GamesService>();
+builder.Services.AddSingleton<IAuthService>(new AuthService(jwtSettings));
 builder.Services.AddDbContext<UsersContext>(options => options.UseSqlServer(connectionString!));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<Player>(options =>
-{
-    options.Password.RequireDigit = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequiredLength = 6;
-    options.Password.RequiredUniqueChars = 0;
-}).AddEntityFrameworkStores<UsersContext>();
-
-builder.Services.AddSignalR().AddHubOptions<LobbyHub>(options =>
-{
-    options.EnableDetailedErrors = true;
-});
-builder.Services.AddSingleton<IGamesService, GamesService>();
-builder.Services.AddSingleton<IAuthService>(new AuthService(jwtSecretKey!, jwtLifespan));
-builder.Services.AddCors(options => options.AddDefaultPolicy(
-                         policy =>
-                         //policy.AllowAnyOrigin()
-                         policy.WithOrigins("http://localhost:3000")
-                         .AllowCredentials()
-                         .AllowAnyHeader()
-                         .AllowAnyMethod()));
-
-builder.Services
-    .AddAuthentication(options =>
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequiredUniqueChars = 0;
+
+        options.Password.RequireDigit = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireUppercase = false;
+    }).AddEntityFrameworkStores<UsersContext>();
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication(options => options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey!))
-
+            ValidAudience = jwtSettings.Audience,
+            ValidIssuer = jwtSettings.Issuer,
+            IssuerSigningKey = jwtSettings.SigningKey,
         };
         options.Events = new JwtBearerEvents
         {
@@ -66,19 +44,14 @@ builder.Services
                 var path = context.HttpContext.Request.Path;
                 if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
                 {
-                    //context.Token = accessToken;
                     context.Request.Headers["Authorization"] = accessToken;
-
                 }
                 return Task.CompletedTask;
             }
         };
     });
-
-
-builder.Services.AddAuthorization();
-
-
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.WithOrigins("http://localhost:3000")
+                .AllowCredentials().AllowAnyHeader().AllowAnyMethod()));
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -87,7 +60,6 @@ using (var scope = app.Services.CreateScope())
     ctx.Database.EnsureDeleted();
     ctx.Database.EnsureCreated();
 }
-
 
 if (app.Environment.IsDevelopment())
 {
@@ -101,10 +73,9 @@ else
 app.UseHttpsRedirection();
 app.UseCors();
 app.UseRouting();
-//app.UseAuthentication();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<LobbyHub>("/hubs/lobby");
-//app.MapHub<GameHub>("/hubs/game");
 
 app.Run();
