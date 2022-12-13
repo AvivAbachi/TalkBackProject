@@ -1,5 +1,4 @@
 import { memo } from 'react';
-import { Button } from '@mui/material';
 import { MarkType } from '../types';
 
 interface BoardButtonProps {
@@ -10,14 +9,14 @@ interface BoardButtonProps {
 
 function BoardButton({ onClick, value, disabled }: BoardButtonProps) {
 	return (
-		<Button
-			variant='contained'
+		<button
+			className='btn-board'
 			onClick={onClick}
-			color={value === 'X' ? 'success' : value === 'O' ? 'warning' : 'info'}
+			color='blue'
 			disabled={disabled || value !== ''}
 		>
 			{value}
-		</Button>
+		</button>
 	);
 }
 export default memo(BoardButton);

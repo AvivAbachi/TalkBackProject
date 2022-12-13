@@ -4,6 +4,7 @@ using MainApi.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace MainApi.Controllers
 {
@@ -24,22 +25,30 @@ namespace MainApi.Controllers
         [HttpGet("/")]
         public ActionResult Index()
         {
-            return Content("Every One");
+            return Ok();
         }
 
         [HttpPost("/Login")]
-        //[ValidateAntiForgeryToken]
         public async Task<ActionResult<string>> Login([FromBody] AuthViewModel model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var result = await signInManager.PasswordSignInAsync(model.UserName, model.Password, false, false);
+            var user = await userManager.FindByNameAsync(model.UserName);
+
+            if (user == null)
+            {
+                ModelState.AddModelError("UserName", "Account isn't found with that username.");
+                return BadRequest(ModelState);
+            }
+
+            var result = await signInManager.PasswordSignInAsync(user, model.Password, false, false);
 
             if (!result.Succeeded)
             {
+                ModelState.AddModelError("Password", "Password isn't right.");
                 return BadRequest(ModelState);
             }
-            var user = await userManager.FindByNameAsync(model.UserName);
+
             return authService.CreateToken(user!);
         }
 
@@ -78,17 +87,18 @@ namespace MainApi.Controllers
         {
             var id = User.Identity?.Name;
             var user = await userManager.FindByIdAsync(id!);
-            if (user == null) return BadRequest();
+            if (user == null) return Unauthorized();
             return authService.CreateToken(user);
         }
 
         [Authorize]
         [HttpGet("/Test")]
-        public async Task<ActionResult<Player>> Test()
+        public async Task<ActionResult> Test()
         {
             var id = User.Identity?.Name;
             var user = await userManager.FindByIdAsync(id!);
-            return user;
+            if (user == null) return Unauthorized();
+            return Ok(user);
         }
     }
 }

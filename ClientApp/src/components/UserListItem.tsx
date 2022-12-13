@@ -1,10 +1,8 @@
 import { PlayerType } from '../types';
-import { Button, Divider, ListItem, ListItemText } from '@mui/material';
 import { memo } from 'react';
-
 interface UserListItemProps extends PlayerType {
 	onClick: (connectionId: string | null) => void;
-	userId?: string | null;
+	playerId?: string | null;
 }
 
 function UserListItem({
@@ -12,22 +10,22 @@ function UserListItem({
 	connectionId,
 	status,
 	userName,
-	userId,
+	playerId,
 }: UserListItemProps) {
 	return (
-		<>
-			<ListItem
-				secondaryAction={
-					status === 'Ready' &&
-					!(connectionId === userId) && (
-						<Button onClick={() => onClick(connectionId)}>Play</Button>
-					)
-				}
-			>
-				<ListItemText primary={userName} secondary={status} />
-			</ListItem>
-			<Divider variant='middle' component='li' />
-		</>
+		<div className='flex items-center border-b px-4 py-2'>
+			<div className='w-full'>
+				<div color='black'>{userName}</div>
+				<div>{status}</div>
+			</div>
+			<div>
+				{status === 'Ready' && !(connectionId === playerId) && (
+					<button color='green' onClick={() => onClick(connectionId)}>
+						Play
+					</button>
+				)}
+			</div>
+		</div>
 	);
 }
 

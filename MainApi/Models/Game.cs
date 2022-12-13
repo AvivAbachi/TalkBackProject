@@ -5,16 +5,16 @@ namespace MainApi.Models
     public class Game
     {
         public string GameId { get; set; }
-        public IPlayerBase? Player1 { get; set; }
-        public IPlayerBase? Player2 { get; set; }
+        public IPlayerBase? P1 { get; set; }
+        public IPlayerBase? P2 { get; set; }
         public Mark[] Board { get; set; } = new Mark[9];
         public GameStatus GameState { get; set; } = GameStatus.Wait;
         public Mark Turn { get; set; } = Mark.X;
         public Game(string gameId, IPlayerBase player1, IPlayerBase player2)
         {
             GameId = gameId;
-            Player1 = player1;
-            Player2 = player2;
+            P1 = player1;
+            P2 = player2;
         }
     }
 
@@ -30,7 +30,7 @@ namespace MainApi.Models
         }
         public static bool PlayerTurn(this Game game, string id, int i)
         {
-            var player = game.Player1?.ConnectionId == id ? GameStatus.P1 : GameStatus.P2;
+            var player = game.P1?.ConnectionId == id ? GameStatus.P1 : GameStatus.P2;
             if (player == game.GameState)
             {
                 if (game.Board[i] == Mark.None)
@@ -53,14 +53,14 @@ namespace MainApi.Models
 
             if (game.GameState != GameStatus.P1 || game.GameState != GameStatus.P2)
             {
-                if (game.GameState == GameStatus.P2R && id == game.Player1.ConnectionId ||
-                    game.GameState == GameStatus.P1R && id == game.Player2.ConnectionId)
+                if (game.GameState == GameStatus.P2R && id == game.P1?.ConnectionId ||
+                    game.GameState == GameStatus.P1R && id == game.P2?.ConnectionId)
                 {
                     game.Reset();
                     game.GameState = (GameStatus)random.Next(3, 5);
                 }
-                else if (id == game.Player1.ConnectionId) game.GameState = GameStatus.P1R;
-                else if (id == game.Player2.ConnectionId) game.GameState = GameStatus.P2R;
+                else if (id == game.P1?.ConnectionId) game.GameState = GameStatus.P1R;
+                else if (id == game.P2?.ConnectionId) game.GameState = GameStatus.P2R;
             }
         }
 

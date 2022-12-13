@@ -12,14 +12,20 @@ export type PlayerType = {
 
 export type GameType = {
 	gameId: string;
-	player1?: PlayerType;
-	player2?: PlayerType;
+	p1?: PlayerType;
+	p2?: PlayerType;
 	board: MarkType[];
 	gameState: GameStateType;
 	turn: MarkType;
 };
 
-export type FormType<T> = {
-	UserName: T;
-	Password: T;
+export type FormType = {
+	UserName: string;
+	Password: string;
+};
+
+export type FormErrorType = {
+	UserName: string[];
+	Password: string[];
+	Server: string[];
 };

@@ -3,13 +3,14 @@ import { FormType } from '../types';
 
 const talkbackApi = axios.create({
 	baseURL: 'https://localhost:7025/',
+	timeout: 3000,
 });
 
-export const login = async (form: FormType<string>) => {
+export const login = async (form: FormType) => {
 	return await talkbackApi.post('/login', form);
 };
 
-export const register = async (form: FormType<string>) => {
+export const register = async (form: FormType) => {
 	return await talkbackApi.post('/register', form);
 };
 

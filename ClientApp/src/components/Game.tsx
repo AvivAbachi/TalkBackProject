@@ -1,7 +1,14 @@
 import { memo, useMemo, useContext } from 'react';
-import { Button } from '@mui/material';
 import { TalkBackContext, TalkBackContextType } from '../hooks/TalkBackContext';
 import BoardButton from './BoardButton';
+// import {
+// 	Card,
+// 	CardBody,
+// 	CardFooter,
+// 	CardHeader,
+// 	Button,
+// 	Typography,
+// } from '@material-tailwind/react';
 
 function Game() {
 	const {
@@ -10,8 +17,8 @@ function Game() {
 	} = useContext(TalkBackContext) as TalkBackContextType;
 
 	const player = useMemo(
-		() => (game?.player1?.connectionId === user?.connectionId ? 'P1' : 'P2'),
-		[game?.player1?.connectionId, user?.connectionId]
+		() => (game?.p1?.connectionId === user?.connectionId ? 'P1' : 'P2'),
+		[game?.p1?.connectionId, user?.connectionId]
 	);
 	const yourTurn = useMemo(() => game?.gameState === player, [game?.gameState, player]);
 
@@ -34,39 +41,52 @@ function Game() {
 	}, [game?.gameState, player]);
 
 	return (
-		<div className='game'>
-			<h1>Tic Tac Toe</h1>
-			<h2>{gameTitle}</h2>
-			<p>
-				{game?.player1?.userName} vs {game?.player2?.userName}
-			</p>
-			<div className={'board' + (yourTurn ? ' board-active' : '')}>
-				{game?.board.map((value, i) => (
-					<BoardButton
-						key={i}
-						value={value}
-						disabled={!yourTurn}
-						onClick={() => gameTurn?.(i)}
-					/>
-				))}
+		<div className='grid h-screen place-items-center '>
+			<div className='w-[28rem] text-center'>
+				<div color='blue' className='mb-4 grid h-28 place-items-center'>
+					<div color='white'>Tic Tac Toe</div>
+				</div>
+				<div>
+					<div>{gameTitle}</div>
+					<div>
+						{game?.p1?.userName} vs {game?.p2?.userName}
+					</div>
+					<div
+						className={
+							'mx-auto mt-4 grid w-fit grid-cols-3 gap-3 rounded-3xl p-5' +
+							(yourTurn ? ' bg-blue-500/10' : '')
+						}
+					>
+						{game?.board.map((value, i) => (
+							<BoardButton
+								key={i}
+								value={value}
+								disabled={!yourTurn}
+								onClick={() => gameTurn?.(i)}
+							/>
+						))}
+					</div>
+				</div>
+				<div className=' pt-0'>
+					<button
+						color='green'
+						disabled={
+							game?.gameState === 'P1' ||
+							game?.gameState === 'P2' ||
+							game?.gameState === player + 'R'
+						}
+						onClick={gameReady}
+					>
+						Ready
+					</button>
+					<button color='indigo' className='mx-4' onClick={gameLeave}>
+						Leave
+					</button>
+					<button color='red' onClick={gameReset} disabled={game?.gameState === 'Wait'}>
+						Reset
+					</button>
+				</div>
 			</div>
-			<Button
-				color='primary'
-				disabled={
-					game?.gameState === 'P1' ||
-					game?.gameState === 'P2' ||
-					game?.gameState === player + 'R'
-				}
-				onClick={gameReady}
-			>
-				Ready
-			</Button>
-			<Button color='secondary' className='mx-3' onClick={gameLeave}>
-				Leave
-			</Button>
-			<Button color='error' onClick={gameReset} disabled={game?.gameState === 'Wait'}>
-				Reset
-			</Button>
 		</div>
 	);
 }

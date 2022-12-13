@@ -4,7 +4,7 @@ import { createSignalRContext } from 'react-signalr';
 import { refreshToken } from '../api/talkbackApi';
 import { GameType, PlayerType } from '../types';
 
-export const TalkBackContext = createContext<TalkBackContextType | null>(null);
+export const TalkBackContext = createContext<TalkBackContextType | any>(null);
 
 const { useSignalREffect, Provider, invoke } = createSignalRContext();
 
@@ -14,22 +14,46 @@ export default function TalkBackProvider({ children }: any) {
 	const [usersList, setUserList] = useState<PlayerType[]>([]);
 	const [token, setToken] = useState<string>();
 
-	useEffect(() => {
-		async function refershTokenAsync() {
-			const token = localStorage.getItem('accessToken');
-			if (token) {
-				try {
-					const res = await refreshToken(token);
-					setToken(res.data);
-				} catch (err) {
-					localStorage.removeItem('accessToken');
-				}
-			}
-		}
-		refershTokenAsync();
+	// Player
+	const login = useCallback((token: string) => {
+		setToken(token);
+		localStorage.setItem('accessToken', token);
 	}, []);
 
-	// Player Effects
+	const logout = useCallback(() => {
+		console.log('dsa');
+
+		localStorage.removeItem('accessToken');
+		setUser(undefined);
+		setgame(undefined);
+		setToken(undefined);
+		setUserList([]);
+	}, []);
+
+	const refershTokenAsync = useCallback(async () => {
+		const token = localStorage.getItem('accessToken');
+		if (token) {
+			try {
+				const res = await refreshToken(token);
+				setToken(res.data);
+			} catch (err) {
+				logout();
+			}
+		}
+	}, [logout]);
+
+	const status = useCallback(() => invoke('playerState'), []);
+
+	useEffect(() => {
+		let ignore = false;
+		if (!ignore) {
+			refershTokenAsync();
+		}
+		return () => {
+			ignore = true;
+		};
+	}, [refershTokenAsync]);
+
 	useSignalREffect(
 		'onLogin',
 		(player, players) => {
@@ -67,10 +91,22 @@ export default function TalkBackProvider({ children }: any) {
 				})
 			);
 		},
-		[usersList]
+		[user, usersList]
 	);
 
-	// Game Effects
+	// Game
+	const gameOpen = useCallback(
+		(connectionId: string | null) => invoke('gameOpen', connectionId),
+		[]
+	);
+	const gameLeave = useCallback(() => invoke('gameLeave'), []);
+	const gameReady = useCallback(() => invoke('gameReady', game?.gameId), [game?.gameId]);
+	const gameReset = useCallback(() => invoke('gameReset', game?.gameId), [game?.gameId]);
+	const gameTurn = useCallback(
+		(i: number) => invoke('gameTurn', game?.gameId, i),
+		[game?.gameId]
+	);
+
 	useSignalREffect(
 		'onGameSet',
 		(game) => {
@@ -92,24 +128,16 @@ export default function TalkBackProvider({ children }: any) {
 			value={{
 				state: { user, game, usersList, token },
 				userEvent: {
-					handelLogin: useCallback((token: string) => {
-						setToken(token);
-						localStorage.setItem('accessToken', token);
-					}, []),
-					changeState: useCallback(() => invoke('playerState'), []),
+					login,
+					status,
+					logout,
 				},
 				gameEvent: {
-					gameOpen: useCallback(
-						(connectionId: string | null) => invoke('gameOpen', connectionId),
-						[]
-					),
-					gameLeave: useCallback(() => invoke('gameLeave', game?.gameId), [game?.gameId]),
-					gameReady: useCallback(() => invoke('gameReady', game?.gameId), [game?.gameId]),
-					gameReset: useCallback(() => invoke('gameReset', game?.gameId), [game?.gameId]),
-					gameTurn: useCallback(
-						(i: number) => invoke('gameTurn', game?.gameId, i),
-						[game?.gameId]
-					),
+					gameOpen,
+					gameLeave,
+					gameReady,
+					gameReset,
+					gameTurn,
 				},
 			}}
 		>
@@ -135,8 +163,9 @@ export type TalkBackContextType = {
 		token: string | undefined;
 	};
 	userEvent: {
-		handelLogin: (token: string) => void;
-		changeState: () => void;
+		login: (token: string) => void;
+		status: () => void;
+		logout: () => void;
 	};
 	gameEvent: {
 		gameOpen: (connectionId: string | null) => void;

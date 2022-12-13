@@ -43,18 +43,14 @@ namespace MainApi.Models.Abstract
     public class JsonNamingPolicyDecorator : JsonNamingPolicy
     {
         readonly JsonNamingPolicy underlyingNamingPolicy;
-
         public JsonNamingPolicyDecorator(JsonNamingPolicy underlyingNamingPolicy) => this.underlyingNamingPolicy = underlyingNamingPolicy;
-
         public override string ConvertName(string name) => underlyingNamingPolicy == null ? name : underlyingNamingPolicy.ConvertName(name);
     }
 
     internal class DictionaryLookupNamingPolicy : JsonNamingPolicyDecorator
     {
         readonly Dictionary<string, string> dictionary;
-
         public DictionaryLookupNamingPolicy(Dictionary<string, string> dictionary, JsonNamingPolicy underlyingNamingPolicy) : base(underlyingNamingPolicy) => this.dictionary = dictionary ?? throw new ArgumentNullException();
-
         public override string ConvertName(string name) => dictionary.TryGetValue(name, out var value) ? value : base.ConvertName(name);
     }
 }

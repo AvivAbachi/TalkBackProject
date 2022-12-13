@@ -1,6 +1,6 @@
 ﻿using MainApi.Models;
 using MainApi.Models.Abstract;
- 
+
 namespace MainApi.Service
 {
     public class GamesService : IGamesService
@@ -10,12 +10,11 @@ namespace MainApi.Service
         public List<IPlayerBase> Players { get; } = new List<IPlayerBase>();
         public List<Game> Games { get; } = new List<Game>();
 
-        public IPlayerBase? AddPlayer(IPlayerBase? player, string connectionId)
+        public IPlayerBase? AddPlayer(IPlayerBase player)
         {
-            if (player != null && !Players.Exists(p => p.ConnectionId == connectionId))
+            if (!Players.Exists(p => p.ConnectionId == player.ConnectionId))
             {
                 Players.Add(player);
-                player.ConnectionId = connectionId;
                 return player;
             }
             return null;
@@ -44,55 +43,42 @@ namespace MainApi.Service
 
         public Game? CrateGame(string p1Id, string p2Id)
         {
-            bool inGame = false;
             foreach (var g in Games)
             {
-                if (g.Player1.ConnectionId == p1Id || g.Player1.ConnectionId == p2Id ||
-                    g.Player2.ConnectionId == p1Id || g.Player2.ConnectionId == p2Id)
+                if (g.P1?.ConnectionId == p1Id || g.P1?.ConnectionId == p2Id ||
+                    g.P2?.ConnectionId == p1Id || g.P2?.ConnectionId == p2Id)
                 {
-                    inGame = true;
-                    break;
+                    return null;
                 }
             }
 
-            if (inGame) return null;
-
             var p1 = StatePlayer(p1Id, PlayerStatus.Play);
             var p2 = StatePlayer(p2Id, PlayerStatus.Play);
-            Game game = new(Guid.NewGuid().ToString(), p1, p2);
+            Game game = new(Guid.NewGuid().ToString(), p1!, p2!);
             Games.Add(game);
             return game;
         }
 
         public Game? LeaveGame(string connectionId)
         {
-            var game = Games.SingleOrDefault(g => g.Player1.ConnectionId == connectionId || g.Player2.ConnectionId == connectionId);
+            var game = Games.SingleOrDefault(g => g.P1?.ConnectionId == connectionId || g.P2?.ConnectionId == connectionId);
             if (game != null)
             {
-                var leaver = game.Player1.ConnectionId == connectionId ? "P1" : "P2";
-                if (leaver == "P1")
+                //var gameStart = game.GameState == GameStatus.P1 || game.GameState == GameStatus.P2;
+                if (game.P1?.ConnectionId == connectionId)
                 {
-                    game.Player1 = null;
-                    game.GameState = GameStatus.P2W;
+                    game.P1 = null;
+                    //game.GameState = GameStatus.P2W;
                 }
-                else
+                else if (game.P2?.ConnectionId == connectionId)
                 {
-                    game.Player2 = null;
-                    game.GameState = GameStatus.P1W;
+                    game.P2 = null;
+                    //game.GameState = GameStatus.P1W;
                 }
-                if (game.Player1 == null || game.Player2 == null) Games.Remove(game);
-            }
-            return game;
-        }
-
-        public Game? RemoveGame(string gameId)
-        {
-            Game? game = Games.SingleOrDefault(p => p.GameId == gameId);
-            if (game != null)
-            {
-                if (game.Player1 != null) game.Player1.Status = PlayerStatus.Idle;
-                if (game.Player2 != null) game.Player2.Status = PlayerStatus.Idle;
-                Games.Remove(game);
+                if (game.P1 == null && game.P2 == null)
+                {
+                    Games.Remove(game);
+                }
             }
             return game;
         }
