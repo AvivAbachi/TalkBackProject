@@ -1,5 +1,7 @@
 import { PlayerType } from '../types';
 import { memo } from 'react';
+import { Button, Typography } from '@material-tailwind/react/';
+
 interface UserListItemProps extends PlayerType {
 	onClick: (connectionId: string | null) => void;
 	playerId?: string | null;
@@ -15,14 +17,23 @@ function UserListItem({
 	return (
 		<div className='flex items-center border-b px-4 py-2'>
 			<div className='w-full'>
-				<div color='black'>{userName}</div>
-				<div>{status}</div>
+				<Typography color='black' variant='h6'>
+					{userName}
+				</Typography>
+				<Typography variant='small' className='text-gray-500'>
+					{status}
+				</Typography>
 			</div>
 			<div>
 				{status === 'Ready' && !(connectionId === playerId) && (
-					<button color='green' onClick={() => onClick(connectionId)}>
+					<Button
+						size='sm'
+						variant='gradient'
+						color='green'
+						onClick={() => onClick(connectionId)}
+					>
 						Play
-					</button>
+					</Button>
 				)}
 			</div>
 		</div>

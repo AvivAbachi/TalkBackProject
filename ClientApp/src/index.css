@@ -4,7 +4,7 @@
 
 @layer components {
 	.btn-board {
-		@apply h-24 w-24 rounded-md !text-4xl disabled:bg-gray-300 disabled:opacity-70;
+		@apply h-24 w-24 rounded-md !text-4xl disabled:opacity-70;
 	}
 	.btn-board:nth-of-type(1) {
 		@apply rounded-tl-2xl;

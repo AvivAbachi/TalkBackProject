@@ -21,7 +21,7 @@ namespace MainApi.Hubs
         public override async Task OnConnectedAsync()
         {
 
-            IPlayerBase? player = await userManager.FindByIdAsync(Context.User?.Identity?.Name);
+            IPlayerBase? player = await userManager.FindByIdAsync(Context.User.Identity.Name!);
 
             if (player == null) throw new HubException("Unauthorized");
 
