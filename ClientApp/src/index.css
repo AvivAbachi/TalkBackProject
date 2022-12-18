@@ -3,14 +3,17 @@
 @tailwind utilities;
 
 @layer components {
-	.dashbord {
-		@apply mx-auto mt-16 max-w-7xl items-start justify-center gap-10 p-4 lg:flex;
+	.dashboard {
+		@apply mx-auto min-h-screen max-w-7xl items-start justify-center gap-8 py-16 px-4 lg:flex;
+	}
+	.board {
+		@apply m-4 mx-auto grid w-fit grid-cols-3 gap-3 rounded-3xl p-4;
 	}
 	.message {
-		@apply mb-4 w-fit rounded-lg rounded-bl-none bg-blue-gray-100   px-4 py-2 text-sm text-blue-gray-900 shadow-md;
+		@apply mb-4 w-fit rounded-lg rounded-bl-none bg-blue-gray-100 px-4 py-2 text-sm text-blue-gray-900 shadow-md shadow-blue-gray-200;
 	}
 	.message.send {
-		@apply mr-0 ml-auto rounded-bl-lg rounded-br-none bg-gradient-to-tr from-blue-600 to-blue-400 text-white;
+		@apply mr-0 ml-auto rounded-bl-lg rounded-br-none bg-gradient-to-tr from-blue-600 to-blue-400 text-white shadow-blue-700/50;
 	}
 	.btn-board {
 		@apply h-24 w-24 rounded-md !text-4xl disabled:opacity-70;

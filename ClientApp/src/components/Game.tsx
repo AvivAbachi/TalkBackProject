@@ -1,15 +1,9 @@
 import { memo, useMemo } from 'react';
+import classNames from 'classnames';
 import useStore, { gameEvent } from '../store/useStore';
-import BoardButton from './base/BoardButton';
-import {
-	Card,
-	CardBody,
-	CardHeader,
-	CardFooter,
-	Typography,
-	Button,
-} from '@material-tailwind/react';
+import { BoardButton, Panel } from './base/';
 import { gameTitle } from '../utils/gameUtilis';
+import { CardBody, CardFooter, Typography, Button } from '@material-tailwind/react';
 
 function Game() {
 	const pl = useStore((state) => state.player);
@@ -28,33 +22,13 @@ function Game() {
 	);
 
 	return (
-		<Card className='flex-1 text-center'>
-			<CardHeader
-				color='light-blue'
-				variant='gradient'
-				className='flex items-center justify-between p-4'
-			>
-				<Typography variant='h4' as='h1'>
-					Tic Tac Toe
-				</Typography>
-				<Button variant='gradient' color='red' size='sm' onClick={gameEvent.gameLeave}>
-					Leave
-				</Button>
-			</CardHeader>
-
-			<CardBody>
+		<Panel title='Tic Tac Toe' action='Leave' onClick={gameEvent.gameLeave}>
+			<CardBody className='text-center'>
 				<Typography variant='h4'>{title}</Typography>
-				<p>
-					{game?.p1?.userName} vs {game?.p2?.userName}
-				</p>
+				{game?.p1?.userName} vs {game?.p2?.userName}
 			</CardBody>
 			<CardFooter divider className='pt-3 pb-8'>
-				<div
-					className={
-						'm-4 mx-auto grid w-fit grid-cols-3 gap-3 rounded-3xl p-4' +
-						(yourTurn ? ' bg-blue-gray-500/20' : '')
-					}
-				>
+				<div className={classNames('board', { 'bg-blue-gray-500/20': yourTurn })}>
 					{game?.board.map((value, i) => (
 						<BoardButton
 							key={i}
@@ -67,6 +41,7 @@ function Game() {
 				<Button
 					variant='gradient'
 					color='green'
+					className='mx-auto block w-full max-w-[19.5rem] text-sm'
 					disabled={
 						game?.gameState === 'P1' ||
 						game?.gameState === 'P2' ||
@@ -76,17 +51,8 @@ function Game() {
 				>
 					Ready
 				</Button>
-
-				<Button
-					variant='gradient'
-					color='orange'
-					onClick={gameEvent.gameReset}
-					disabled={game?.gameState === 'Wait'}
-				>
-					Reset
-				</Button>
 			</CardFooter>
-		</Card>
+		</Panel>
 	);
 }
 

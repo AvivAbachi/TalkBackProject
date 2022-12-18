@@ -33,12 +33,6 @@ export const gameReady = () => {
 		.connection.invoke('gameReady', useStore.getState().game?.gameId);
 };
 
-export const gameReset = () => {
-	return useStore
-		.getState()
-		.connection.invoke('gameReset', useStore.getState().game?.gameId);
-};
-
 export const gameTurn = (i: number) => {
 	return useStore
 		.getState()
@@ -59,7 +53,6 @@ const gameEvent = {
 	gameOpen,
 	gameLeave,
 	gameReady,
-	gameReset,
 	gameTurn,
 	gameMessage,
 };

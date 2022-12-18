@@ -1,6 +1,6 @@
+import { memo, ReactNode, MouseEvent } from 'react';
+import classNames from 'classnames';
 import { Button, Card, CardHeader, Typography } from '@material-tailwind/react';
-import React, { memo, ReactNode, MouseEvent } from 'react';
-import classnames from 'classnames';
 import { asType } from '@material-tailwind/react/types/components/typography';
 import { colors } from '@material-tailwind/react/types/generic';
 
@@ -8,11 +8,11 @@ interface PanelProps {
 	title?: string;
 	action?: string;
 	className?: string;
-	children?: ReactNode;
 	center?: boolean;
-	as?: asType;
+	children?: ReactNode;
 	color?: colors;
-	onClick?: (event: MouseEvent<HTMLButtonElement>) => {};
+	as?: asType;
+	onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
 }
 
 function Panel({
@@ -26,8 +26,15 @@ function Panel({
 	onClick,
 }: PanelProps) {
 	return (
-		<Card className={classnames({ 'flex-1 shadow-xl': true, className })}>
-			<CardHeader color={color} variant='gradient' className=''>
+		<Card className={classNames('flex-1 shadow-xl', className)}>
+			<CardHeader
+				color={color}
+				variant='gradient'
+				className={classNames(
+					'flex items-center justify-between p-4 text-3xl font-bold uppercase',
+					{ 'justify-center': center }
+				)}
+			>
 				<Typography variant='h4' as={as}>
 					{title}
 				</Typography>

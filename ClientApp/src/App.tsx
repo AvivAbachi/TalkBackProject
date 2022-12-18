@@ -28,20 +28,24 @@ function App() {
 		connection?.on('onGameSet', gameEvent.onSetGame);
 		connection?.on('onGameClose', gameEvent.onGameClose);
 		connection?.on('onGameMessage', gameEvent.onGameMessage);
-		connection?.on('onError', (error) => {
-			console.error(error);
-			connection.stop();
-		});
+		connection?.on('onError', console.error);
 	}, [connection]);
 
-	if (state !== 'Connected') {
-		return <Login />;
-	}
-
 	return (
-		<div className='dashbord'>
-			{game ? <Game /> : <MyAcount />}
-			{game ? <Chat /> : <PlayerList />}
+		<div className='dashboard'>
+			{state !== 'Connected' ? (
+				<Login />
+			) : !game ? (
+				<>
+					<MyAcount />
+					<PlayerList />
+				</>
+			) : (
+				<>
+					<Game />
+					<Chat />
+				</>
+			)}
 		</div>
 	);
 }

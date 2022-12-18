@@ -3,7 +3,7 @@ import { PlayerType } from '../../types';
 import { Button, Typography } from '@material-tailwind/react/';
 
 interface UserListItemProps extends PlayerType {
-	onClick: (connectionId: string | null) => void;
+	onClick?: (connectionId: string | null) => void;
 	playerId?: string | null;
 }
 
@@ -30,7 +30,7 @@ function PlayerListItem({
 						size='sm'
 						variant='gradient'
 						color='light-green'
-						onClick={() => onClick(connectionId)}
+						onClick={() => onClick?.(connectionId)}
 					>
 						Play
 					</Button>

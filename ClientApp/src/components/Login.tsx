@@ -1,15 +1,8 @@
 import { useState, FormEvent, memo } from 'react';
 import { FormErrorType, FormType } from '../types';
 import { playerEvent } from '../store/useStore';
-import Error from './base/Error';
-import {
-	Card,
-	CardHeader,
-	CardBody,
-	Typography,
-	Input,
-	Button,
-} from '@material-tailwind/react';
+import { Error, Panel } from './base/';
+import { CardBody, Typography, Input, Button } from '@material-tailwind/react';
 
 function Login() {
 	const [Waiting, setWaiting] = useState(false);
@@ -46,60 +39,57 @@ function Login() {
 	};
 
 	return (
-		<div className='grid min-h-screen place-items-center p-4'>
-			<Card className='w-full max-w-md shadow-xl'>
-				<CardHeader color='light-blue' variant='gradient'>
-					<Typography className='m-4 text-center text-3xl font-bold uppercase' as='h1'>
-						{isLogin ? 'Login ' : 'Register'}
-					</Typography>
-				</CardHeader>
-				<CardBody>
-					<form onSubmit={handleSubmit} className='grid gap-4'>
-						<Input
-							value={formValue.UserName}
-							color={!!formError?.UserName?.length ? 'red' : 'light-blue'}
-							variant='standard'
-							size='lg'
-							label='Username'
-							name='UserName'
-							onChange={onChange}
-						/>
-						{formError.UserName?.map((error) => (
-							<Error error={error} />
-						))}
-						<Input
-							value={formValue.Password}
-							color={!!formError?.Password?.length ? 'red' : 'light-blue'}
-							variant='standard'
-							size='lg'
-							label='Password'
-							name='Password'
-							type='password'
-							onChange={onChange}
-						/>
-						{formError.Password?.map((error) => (
-							<Error error={error} />
-						))}
-						<Button color='light-blue' disabled={Waiting} type='submit'>
-							{isLogin ? 'Log In' : 'Sign up'}
-						</Button>
-						{formError.Server?.map((error) => (
-							<Error error={error} />
-						))}
-						<div className=' flex justify-center'>
-							{!isLogin ? 'Already have an account?' : "Don't have an account?"}
-							<Typography
-								color='light-blue'
-								className='ml-1 cursor-pointer font-semibold'
-								onClick={handelSwitch}
-							>
-								{!isLogin ? 'Log in' : 'Sign up'}
-							</Typography>
-						</div>
-					</form>
-				</CardBody>
-			</Card>
-		</div>
+		<Panel
+			className='w-full max-w-md self-center'
+			title={isLogin ? 'Login ' : 'Register'}
+			center
+		>
+			<CardBody>
+				<form onSubmit={handleSubmit} className='grid gap-4'>
+					<Input
+						value={formValue.UserName}
+						color={!!formError?.UserName?.length ? 'red' : 'light-blue'}
+						variant='standard'
+						size='lg'
+						label='Username'
+						name='UserName'
+						onChange={onChange}
+					/>
+					{formError.UserName?.map((error, i) => (
+						<Error key={i} error={error} />
+					))}
+					<Input
+						value={formValue.Password}
+						color={!!formError?.Password?.length ? 'red' : 'light-blue'}
+						variant='standard'
+						size='lg'
+						label='Password'
+						name='Password'
+						type='password'
+						onChange={onChange}
+					/>
+					{formError.Password?.map((error, i) => (
+						<Error key={i} error={error} />
+					))}
+					<Button color='light-blue' disabled={Waiting} type='submit'>
+						{isLogin ? 'Log In' : 'Sign up'}
+					</Button>
+					{formError.Server?.map((error, i) => (
+						<Error key={i} error={error} />
+					))}
+					<div className='flex justify-center'>
+						{!isLogin ? 'Already have an account?' : "Don't have an account?"}
+						<Typography
+							color='light-blue'
+							className='ml-1 cursor-pointer font-semibold'
+							onClick={handelSwitch}
+						>
+							{!isLogin ? 'Log in' : 'Sign up'}
+						</Typography>
+					</div>
+				</form>
+			</CardBody>
+		</Panel>
 	);
 }
 

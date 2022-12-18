@@ -4,8 +4,6 @@ export type GameStateType = 'Wait' | 'P1R' | 'P2R' | 'P1' | 'P2' | 'P1W' | 'P2W'
 
 export type PlayerStateType = 'Idle' | 'Ready' | 'Play';
 
-export type FilterType = '' | 'ready';
-
 export type PlayerType = {
 	connectionId: string | null;
 	userName: string;
