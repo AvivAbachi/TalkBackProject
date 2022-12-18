@@ -79,13 +79,13 @@ function Login() {
 					))}
 					<div className='flex justify-center'>
 						{!isLogin ? 'Already have an account?' : "Don't have an account?"}
-						<Typography
-							color='light-blue'
-							className='ml-1 cursor-pointer font-semibold'
+						<button
+							type='button'
+							className='ml-1 cursor-pointer font-semibold text-light-blue-500'
 							onClick={handelSwitch}
 						>
 							{!isLogin ? 'Log in' : 'Sign up'}
-						</Typography>
+						</button>
 					</div>
 				</form>
 			</CardBody>

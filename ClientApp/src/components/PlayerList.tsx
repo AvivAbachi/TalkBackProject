@@ -1,4 +1,4 @@
-import { useState, memo } from 'react';
+import { useState, memo, useCallback } from 'react';
 import { PlayerStateType } from '../types';
 import useStore, { gameEvent } from '../store/useStore';
 import { Panel, PlayerListItem } from './base/';
@@ -8,21 +8,26 @@ function PlayerList() {
 	const [filter, setFilter] = useState<PlayerStateType>('Idle');
 	const player = useStore((state) => state.player);
 	const list = useStore((state) => state.playersList);
+	const filterList = useCallback(
+		() => (filter === 'Idle' ? list : list.filter((p) => p.status === filter)),
+		[filter, list]
+	);
 
 	return (
 		<Panel title='Player List' className='mt-24 lg:mt-0'>
 			<CardBody>
-				<Tabs
-					value={filter}
-					onChange={(val: string) => setFilter(val as PlayerStateType)}
-				>
+				<Tabs value={filter}>
 					<TabsHeader>
-						<Tab value='Idle'>All player</Tab>
-						<Tab value='Ready'>Ready to play</Tab>
+						<Tab value='Idle' onClick={() => setFilter('Idle')}>
+							All player
+						</Tab>
+						<Tab value='Ready' onClick={() => setFilter('Ready')}>
+							Ready to play
+						</Tab>
 					</TabsHeader>
 				</Tabs>
 				<ul className='max-h-96 overflow-auto'>
-					{list.map((pl) => (
+					{filterList().map((pl) => (
 						<PlayerListItem
 							key={pl.connectionId}
 							{...pl}

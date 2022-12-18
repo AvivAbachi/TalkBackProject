@@ -10,6 +10,7 @@ import {
 
 interface TalkbackState {
 	token?: string;
+	error: string;
 	player?: PlayerType;
 	game?: GameType;
 	chat: MessageType[];
@@ -19,9 +20,10 @@ interface TalkbackState {
 
 const useStore = create<TalkbackState>((set, get) => ({
 	token: undefined,
+	error: '',
 	player: undefined,
-	playersList: [],
 	game: undefined,
+	playersList: [],
 	chat: [],
 	connection: new HubConnectionBuilder()
 		.withUrl(process.env?.REACT_APP_GAME ?? '', {
@@ -46,6 +48,13 @@ useStore.subscribe(async (state, prev) => {
 if (process.env.NODE_ENV === 'development') {
 	mountStoreDevtool('TalkbackStore', useStore);
 }
+
+export const setError = (error: string) => {
+	if (error) console.error(error);
+	useStore.setState(() => ({ error }), false);
+};
+
+export const clearError = () => setError('');
 
 export { default as gameEvent } from './gameEvent';
 export { default as playerEvent } from './playerEvent';

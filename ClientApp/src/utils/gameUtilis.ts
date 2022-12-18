@@ -1,6 +1,6 @@
 import { GameStateType } from '../types';
 
-export const gameTitle = (gameState?: GameStateType, player?: 'P1' | 'P2') => {
+const title = (gameState?: GameStateType, player?: 'P1' | 'P2') => {
 	switch (gameState) {
 		case 'P1R':
 		case 'P2R':
@@ -15,3 +15,9 @@ export const gameTitle = (gameState?: GameStateType, player?: 'P1' | 'P2') => {
 			return gameState;
 	}
 };
+
+const gameUtilis = {
+	title,
+};
+
+export default gameUtilis;

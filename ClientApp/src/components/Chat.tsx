@@ -41,6 +41,7 @@ function Chat() {
 				<form onSubmit={handelSubmit} className='flex'>
 					<Input
 						size='lg'
+						required
 						labelProps={{ className: 'hidden' }}
 						className='m-0 border-t-gray-400 focus:!border-t-blue-500'
 						value={message}
@@ -52,7 +53,9 @@ function Chat() {
 						className='text-md ml-4 flex h-11 items-center'
 					>
 						Send
-						<IconSend className='ml-2 h-5 w-5 rotate-90' />
+						<span>
+							<IconSend className='mx-2 h-5 w-5 rotate-90' />
+						</span>
 					</Button>
 				</form>
 			</CardFooter>

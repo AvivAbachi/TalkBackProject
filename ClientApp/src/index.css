@@ -30,4 +30,14 @@
 	.btn-board:nth-of-type(9) {
 		@apply rounded-br-2xl;
 	}
+	.btn-board.lose:disabled,
+	.btn-board.win:disabled {
+		@apply opacity-100;
+	}
+	.btn-board.lose:disabled {
+		@apply border-4 border-red-300 from-red-500 to-red-500;
+	}
+	.btn-board.win:disabled {
+		@apply border-4 border-green-300 from-green-500 to-green-500;
+	}
 }

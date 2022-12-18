@@ -1,4 +1,7 @@
-export type MarkType = '' | 'X' | 'O';
+export type MarkType = {
+	value: '' | 'X' | 'O';
+	status: boolean;
+};
 
 export type GameStateType = 'Wait' | 'P1R' | 'P2R' | 'P1' | 'P2' | 'P1W' | 'P2W' | 'Draw';
 

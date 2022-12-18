@@ -81,16 +81,6 @@ namespace MainApi.Hubs
             }
         }
 
-        //public async Task GameReset(string gameId)
-        //{
-        //    var game = gamesService.Games.SingleOrDefault(g => g.GameId == gameId);
-        //    if (game != null)
-        //    {
-        //        game.Reset();
-        //        await Clients.Group(game.GameId).SendAsync("onGameSet", game);
-        //    }
-        //}
-
         public async Task GameReady(string gameId)
         {
             var game = gamesService.Games.SingleOrDefault(g => g.GameId == gameId);

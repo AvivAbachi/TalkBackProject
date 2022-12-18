@@ -1,19 +1,20 @@
 import { memo } from 'react';
-import { MarkType } from '../../types';
+import classNames from 'classnames';
 import { Button } from '@material-tailwind/react/';
 
 interface BoardButtonProps {
 	onClick?: () => void;
-	value?: MarkType;
+	value?: '' | 'X' | 'O';
 	disabled?: boolean;
+	hightlight: '' | 'win' | 'lose';
 }
 
-function BoardButton({ onClick, value, disabled }: BoardButtonProps) {
+function BoardButton({ onClick, value, disabled, hightlight }: BoardButtonProps) {
 	return (
 		<Button
 			variant='gradient'
 			color='blue-gray'
-			className='btn-board'
+			className={classNames('btn-board', { [hightlight]: hightlight })}
 			onClick={onClick}
 			disabled={disabled || value !== ''}
 		>

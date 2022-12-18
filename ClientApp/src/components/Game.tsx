@@ -2,7 +2,7 @@ import { memo, useMemo } from 'react';
 import classNames from 'classnames';
 import useStore, { gameEvent } from '../store/useStore';
 import { BoardButton, Panel } from './base/';
-import { gameTitle } from '../utils/gameUtilis';
+import gameUtilis from '../utils/gameUtilis';
 import { CardBody, CardFooter, Typography, Button } from '@material-tailwind/react';
 
 function Game() {
@@ -17,7 +17,7 @@ function Game() {
 	const yourTurn = useMemo(() => game?.gameState === player, [game?.gameState, player]);
 
 	const title = useMemo(
-		() => gameTitle(game?.gameState, player),
+		() => gameUtilis.title(game?.gameState, player),
 		[game?.gameState, player]
 	);
 
@@ -29,10 +29,17 @@ function Game() {
 			</CardBody>
 			<CardFooter divider className='pt-3 pb-8'>
 				<div className={classNames('board', { 'bg-blue-gray-500/20': yourTurn })}>
-					{game?.board.map((value, i) => (
+					{game?.board.map((mark, i) => (
 						<BoardButton
 							key={i}
-							value={value}
+							value={mark.value}
+							hightlight={
+								mark.status && (game.gameState === 'P1W' || game.gameState === 'P2W')
+									? game.gameState === player + 'W'
+										? 'win'
+										: 'lose'
+									: ''
+							}
 							disabled={!yourTurn}
 							onClick={() => gameEvent.gameTurn(i)}
 						/>
