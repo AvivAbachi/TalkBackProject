@@ -2,7 +2,7 @@ import axios from 'axios';
 import { FormType } from '../types';
 
 const talkbackApi = axios.create({
-	baseURL: 'https://localhost:7025/',
+	baseURL: process.env.REACT_APP_SERVER ?? '',
 	timeout: 3000,
 });
 

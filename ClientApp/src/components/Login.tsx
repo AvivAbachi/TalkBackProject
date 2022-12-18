@@ -1,22 +1,17 @@
-import { useState, FormEvent, useContext, useMemo } from 'react';
+import { useState, FormEvent, memo } from 'react';
 import { FormErrorType, FormType } from '../types';
-import { login, register } from '../api/talkbackApi';
-import { TalkBackContext, TalkBackContextType } from '../hooks/TalkBackContext';
-
+import { playerEvent } from '../store/useStore';
+import Error from './base/Error';
 import {
 	Card,
 	CardHeader,
 	CardBody,
 	Typography,
-	Alert,
 	Input,
 	Button,
 } from '@material-tailwind/react';
 
-import { colors } from '@material-tailwind/react/types/generic';
-
 function Login() {
-	const { userEvent } = useContext(TalkBackContext) as TalkBackContextType;
 	const [Waiting, setWaiting] = useState(false);
 	const [isLogin, setIsLogin] = useState(false);
 
@@ -31,25 +26,14 @@ function Login() {
 		Server: [],
 	});
 
-	const color = useMemo(() => (isLogin ? 'indigo' : 'light-blue') as colors, [isLogin]);
-
-	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+	const handleSubmit = async (event: FormEvent) => {
 		event.preventDefault();
 		setWaiting(true);
 		setFormError({ UserName: [], Password: [], Server: [] });
-		try {
-			const res = isLogin ? await login(formValue) : await register(formValue);
-			userEvent.login(res?.data);
-		} catch (err: any) {
-			if (err?.response?.status === 400) {
-				const data = err.response.data;
-				setFormError(!!data?.errors ? data?.errors : data);
-			} else {
-				setFormError({ ...formError, Server: [err.message] });
-			}
-		} finally {
-			setWaiting(false);
-		}
+
+		await playerEvent.login(formValue, isLogin).catch((err) => setFormError(err));
+
+		setWaiting(false);
 	};
 
 	const handelSwitch = () => {
@@ -64,7 +48,7 @@ function Login() {
 	return (
 		<div className='grid min-h-screen place-items-center p-4'>
 			<Card className='w-full max-w-md shadow-xl'>
-				<CardHeader color={color} variant='gradient'>
+				<CardHeader color='light-blue' variant='gradient'>
 					<Typography className='m-4 text-center text-3xl font-bold uppercase' as='h1'>
 						{isLogin ? 'Login ' : 'Register'}
 					</Typography>
@@ -72,31 +56,31 @@ function Login() {
 				<CardBody>
 					<form onSubmit={handleSubmit} className='grid gap-4'>
 						<Input
-							label='Username'
+							value={formValue.UserName}
+							color={!!formError?.UserName?.length ? 'red' : 'light-blue'}
 							variant='standard'
 							size='lg'
-							color={!!formError?.UserName?.length ? 'red' : color}
+							label='Username'
 							name='UserName'
-							value={formValue.UserName}
 							onChange={onChange}
 						/>
 						{formError.UserName?.map((error) => (
 							<Error error={error} />
 						))}
 						<Input
-							label='Password'
+							value={formValue.Password}
+							color={!!formError?.Password?.length ? 'red' : 'light-blue'}
 							variant='standard'
 							size='lg'
-							color={!!formError?.Password?.length ? 'red' : color}
+							label='Password'
 							name='Password'
 							type='password'
-							value={formValue.Password}
 							onChange={onChange}
 						/>
 						{formError.Password?.map((error) => (
 							<Error error={error} />
 						))}
-						<Button color={color} disabled={Waiting} type='submit'>
+						<Button color='light-blue' disabled={Waiting} type='submit'>
 							{isLogin ? 'Log In' : 'Sign up'}
 						</Button>
 						{formError.Server?.map((error) => (
@@ -105,7 +89,7 @@ function Login() {
 						<div className=' flex justify-center'>
 							{!isLogin ? 'Already have an account?' : "Don't have an account?"}
 							<Typography
-								color={color}
+								color='light-blue'
 								className='ml-1 cursor-pointer font-semibold'
 								onClick={handelSwitch}
 							>
@@ -119,31 +103,4 @@ function Login() {
 	);
 }
 
-export default Login;
-
-function Error({ error }: { error: string }) {
-	return (
-		<Alert
-			variant='gradient'
-			icon={
-				<svg
-					xmlns='http://www.w3.org/2000/svg'
-					className='mr-1 inline-block h-6 w-6 flex-shrink-0 stroke-current'
-					fill='none'
-					viewBox='0 0 24 24'
-				>
-					<path
-						children
-						strokeLinecap='round'
-						strokeLinejoin='round'
-						strokeWidth='2'
-						d='M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
-					/>
-				</svg>
-			}
-			color='red'
-		>
-			{error}
-		</Alert>
-	);
-}
+export default memo(Login);

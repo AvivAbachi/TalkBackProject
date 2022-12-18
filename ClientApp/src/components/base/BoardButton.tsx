@@ -1,6 +1,6 @@
 import { memo } from 'react';
+import { MarkType } from '../../types';
 import { Button } from '@material-tailwind/react/';
-import { MarkType } from '../types';
 
 interface BoardButtonProps {
 	onClick?: () => void;
@@ -21,4 +21,5 @@ function BoardButton({ onClick, value, disabled }: BoardButtonProps) {
 		</Button>
 	);
 }
+
 export default memo(BoardButton);

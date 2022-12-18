@@ -12,7 +12,7 @@ namespace MainApi.Service
 
         public IPlayerBase? AddPlayer(IPlayerBase player)
         {
-            if (!Players.Exists(p => p.ConnectionId == player.ConnectionId))
+            if (!Players.Exists(p => p?.Id == player.Id))
             {
                 Players.Add(player);
                 return player;
@@ -22,21 +22,21 @@ namespace MainApi.Service
 
         public IPlayerBase? RemovePlayer(string connectionId)
         {
-            IPlayerBase? player = Players.SingleOrDefault(p => p.ConnectionId == connectionId);
+            var player = Players.SingleOrDefault(p => p.ConnectionId == connectionId);
             if (player != null) Players.Remove(player);
             return player;
         }
 
         public IPlayerBase? StatePlayer(string connectionId)
         {
-            IPlayerBase? player = Players.SingleOrDefault(p => p.ConnectionId == connectionId);
+            var player = Players.SingleOrDefault(p => p.ConnectionId == connectionId);
             if (player != null) player.Status = player.Status == PlayerStatus.Idle ? PlayerStatus.Ready : PlayerStatus.Idle;
             return player;
         }
 
         public IPlayerBase? StatePlayer(string connectionId, PlayerStatus status)
         {
-            IPlayerBase? player = Players.SingleOrDefault(p => p.ConnectionId == connectionId);
+            var player = Players.SingleOrDefault(p => p.ConnectionId == connectionId);
             if (player != null) player.Status = status;
             return player;
         }
@@ -64,21 +64,18 @@ namespace MainApi.Service
             var game = Games.SingleOrDefault(g => g.P1?.ConnectionId == connectionId || g.P2?.ConnectionId == connectionId);
             if (game != null)
             {
-                //var gameStart = game.GameState == GameStatus.P1 || game.GameState == GameStatus.P2;
+                bool gameStart = game.GameState == GameStatus.P1 || game.GameState == GameStatus.P2;
                 if (game.P1?.ConnectionId == connectionId)
                 {
                     game.P1 = null;
-                    //game.GameState = GameStatus.P2W;
+                    if (gameStart) game.GameState = GameStatus.P2W;
                 }
                 else if (game.P2?.ConnectionId == connectionId)
                 {
                     game.P2 = null;
-                    //game.GameState = GameStatus.P1W;
+                    if (gameStart) game.GameState = GameStatus.P1W;
                 }
-                if (game.P1 == null && game.P2 == null)
-                {
-                    Games.Remove(game);
-                }
+                if (game.P1 == null && game.P2 == null) Games.Remove(game);
             }
             return game;
         }

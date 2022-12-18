@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import TalkBackProvider from './hooks/TalkBackContext';
 //import reportWebVitals from './reportWebVitals';
 import App from './App';
 import './index.css';
@@ -8,9 +7,7 @@ import './index.css';
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
 	<React.StrictMode>
-		<TalkBackProvider>
-			<App />
-		</TalkBackProvider>
+		<App />
 	</React.StrictMode>
 );
 

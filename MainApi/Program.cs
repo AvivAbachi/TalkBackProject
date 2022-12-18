@@ -22,9 +22,12 @@ builder.Services.AddDefaultIdentity<Player>(options =>
         options.Password.RequireNonAlphanumeric = false;
         options.Password.RequiredUniqueChars = 0;
 
-        //options.Password.RequireDigit = false;
-        //options.Password.RequireLowercase = false;
-        //options.Password.RequireUppercase = false;
+        if (builder.Environment.IsDevelopment())
+        {
+            options.Password.RequireDigit = false;
+            options.Password.RequireLowercase = false;
+            options.Password.RequireUppercase = false;
+        }
     }).AddEntityFrameworkStores<UsersContext>();
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(options => options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme)

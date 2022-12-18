@@ -1,5 +1,5 @@
-import { PlayerType } from '../types';
 import { memo } from 'react';
+import { PlayerType } from '../../types';
 import { Button, Typography } from '@material-tailwind/react/';
 
 interface UserListItemProps extends PlayerType {
@@ -7,7 +7,7 @@ interface UserListItemProps extends PlayerType {
 	playerId?: string | null;
 }
 
-function UserListItem({
+function PlayerListItem({
 	onClick,
 	connectionId,
 	status,
@@ -29,7 +29,7 @@ function UserListItem({
 					<Button
 						size='sm'
 						variant='gradient'
-						color='green'
+						color='light-green'
 						onClick={() => onClick(connectionId)}
 					>
 						Play
@@ -40,4 +40,4 @@ function UserListItem({
 	);
 }
 
-export default memo(UserListItem);
+export default memo(PlayerListItem);

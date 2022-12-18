@@ -1,15 +1,49 @@
-import { memo, useContext } from 'react';
+import { memo, useEffect, useRef } from 'react';
+import shallow from 'zustand/shallow';
 import Login from './components/Login';
 import Game from './components/Game';
-import Home from './components/Home';
-import { TalkBackContext, TalkBackContextType } from './hooks/TalkBackContext';
+import useStore, { gameEvent, playerEvent } from './store/useStore';
+import PlayerList from './components/PlayerList';
+import MyAcount from './components/MyAcount';
+import Chat from './components/Chat';
 
 function App() {
-	const {
-		state: { user, game },
-	} = useContext(TalkBackContext) as TalkBackContextType;
+	const load = useRef(false);
+	const game = useStore((state) => state.game);
+	const connection = useStore((state) => state.connection);
+	const state = useStore((state) => state.connection.state, shallow);
 
-	return !user ? <Login /> : !game ? <Home /> : <Game />;
+	useEffect(() => {
+		if (!load.current) {
+			load.current = true;
+			playerEvent.refreshToken();
+		}
+	}, []);
+
+	useEffect(() => {
+		connection?.on('onLogin', playerEvent.onLogin);
+		connection?.on('onPlayerLogin', playerEvent.onPlayerLogin);
+		connection?.on('onPlayerLogout', playerEvent.onPlayerLogout);
+		connection?.on('onPlayerState', playerEvent.onPlayerState);
+		connection?.on('onGameSet', gameEvent.onSetGame);
+		connection?.on('onGameClose', gameEvent.onGameClose);
+		connection?.on('onGameMessage', gameEvent.onGameMessage);
+		connection?.on('onError', (error) => {
+			console.error(error);
+			connection.stop();
+		});
+	}, [connection]);
+
+	if (state !== 'Connected') {
+		return <Login />;
+	}
+
+	return (
+		<div className='dashbord'>
+			{game ? <Game /> : <MyAcount />}
+			{game ? <Chat /> : <PlayerList />}
+		</div>
+	);
 }
 
 export default memo(App);
@@ -21,4 +55,6 @@ export default memo(App);
 
 // https://github.com/AndyButland/BackgammonR
 
-// https://merakiui.com/
+// https://github.com/lucassarcanjo/live-chat
+// https://github.com/jherr/efficient-selectors
+// https://docs.pmnd.rs/zustand/guides/practice-with-no-store-actions

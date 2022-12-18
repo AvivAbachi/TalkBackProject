@@ -20,20 +20,18 @@ namespace MainApi.Hubs
 
         public override async Task OnConnectedAsync()
         {
+            IPlayerBase? player = await userManager.FindByIdAsync(Context.User.Identity.Name);
 
-            IPlayerBase? player = await userManager.FindByIdAsync(Context.User.Identity.Name!);
-
-            if (player == null) throw new HubException("Unauthorized");
+            if (player == null) await SendError("Unauthorized");
 
             player.ConnectionId = Context.ConnectionId;
             player = gamesService.AddPlayer(player);
 
-            if (player == null) throw new HubException("Player Connected");
+            if (player == null) await SendError("Player already connected");
 
             await Clients.Others.SendAsync("onPlayerLogin", player);
-            await Clients.Caller.SendAsync("onLogin", player, gamesService.Players);
+            await Clients.Caller.SendAsync("onLogin", new { player.Id, player.ConnectionId, player.Status, player.UserName }, gamesService.Players);
             await base.OnConnectedAsync();
-
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
@@ -62,7 +60,7 @@ namespace MainApi.Hubs
         {
             var game = gamesService.CrateGame(Context.ConnectionId, p2Id);
 
-            if (game == null) throw new HubException("Player on Game");
+            if (game == null) await SendError("Player already on game");
 
             await Groups.AddToGroupAsync(game.P1.ConnectionId, game.GameId);
             await Groups.AddToGroupAsync(game.P2.ConnectionId, game.GameId);
@@ -107,10 +105,24 @@ namespace MainApi.Hubs
         {
             var game = gamesService.Games.SingleOrDefault(g => g.GameId == gameId);
             var res = game?.PlayerTurn(Context.ConnectionId, i);
-            if (res == true)
+            if (res == true) await Clients.Group(game!.GameId).SendAsync("onGameSet", game);
+            else await SendError("Not vaild move!");
+        }
+
+        public async Task GameMessage(string gameId, string message)
+        {
+            var game = gamesService.Games.SingleOrDefault(g => g.GameId == gameId);
+            if (game != null)
             {
-                await Clients.Group(game!.GameId).SendAsync("onGameSet", game);
+                var m = new Message { Id = Context.ConnectionId , Text = message };
+                await Clients.Group(game.GameId).SendAsync("onGameMessage", m);
             }
+        }
+
+        private async Task SendError(string message)
+        {
+            await Clients.Caller.SendAsync("onError", message);
+            throw new HubException();
         }
     }
 }

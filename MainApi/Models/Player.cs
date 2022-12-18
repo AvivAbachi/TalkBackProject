@@ -7,7 +7,7 @@ namespace MainApi.Models
     public class Player : IdentityUser, IPlayerBase
     {
         [NotMapped]
-        public string? ConnectionId { get; set; }
+        public string ConnectionId { get; set; }
         [NotMapped]
         public PlayerStatus Status { get; set; }
     }
