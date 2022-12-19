@@ -6,8 +6,8 @@ using Microsoft.Extensions.Options;
 
 namespace MainApi.Context
 {
-    public class UsersContext : ApiAuthorizationDbContext<Player>
+    public class PlayersContext : ApiAuthorizationDbContext<Player>
     {
-        public UsersContext(DbContextOptions options, IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions) { }
+        public PlayersContext(DbContextOptions options, IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions) { }
     }
 }

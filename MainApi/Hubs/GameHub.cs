@@ -11,9 +11,12 @@ namespace MainApi.Hubs
     public class GameHub : Hub
     {
         private readonly IGamesService gamesService;
+        private readonly IPlayersService playersService;
         private readonly UserManager<Player> userManager;
-        public GameHub(IGamesService gamesService, UserManager<Player> userManager)
+
+        public GameHub(IPlayersService playersService, IGamesService gamesService, UserManager<Player> userManager)
         {
+            this.playersService = playersService;
             this.gamesService = gamesService;
             this.userManager = userManager;
         }
@@ -25,18 +28,18 @@ namespace MainApi.Hubs
             if (player == null) await SendError("Unauthorized");
 
             player.ConnectionId = Context.ConnectionId;
-            player = gamesService.AddPlayer(player);
+            player = playersService.AddPlayer(player);
 
             if (player == null) await SendError("Player already connected");
 
             await Clients.Others.SendAsync("onPlayerLogin", player);
-            await Clients.Caller.SendAsync("onLogin", new { player.Id, player.ConnectionId, player.Status, player.UserName }, gamesService.Players);
+            await Clients.Caller.SendAsync("onLogin", new { player.Id, player.ConnectionId, player.Status, player.UserName }, playersService.Players);
             await base.OnConnectedAsync();
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var player = gamesService.RemovePlayer(Context.ConnectionId);
+            var player = playersService.RemovePlayer(Context.ConnectionId);
             if (player != null)
             {
                 var game = gamesService.LeaveGame(Context.ConnectionId);
@@ -52,16 +55,21 @@ namespace MainApi.Hubs
 
         public async Task PlayerState()
         {
-            var player = gamesService.StatePlayer(Context.ConnectionId);
+            var player = playersService.GetPlayer(Context.ConnectionId);
+            if (player != null) player.Status = player.Status == PlayerStatus.Idle ? PlayerStatus.Ready : PlayerStatus.Idle;
             await Clients.All.SendAsync("onPlayerState", player);
         }
 
         public async Task GameOpen(string p2Id)
         {
-            var game = gamesService.CrateGame(Context.ConnectionId, p2Id);
+            var p1 = playersService.GetPlayer(Context.ConnectionId);
+            var p2 = playersService.GetPlayer(p2Id);
+            var game = gamesService.CrateGame(p1, p2);
 
             if (game == null) await SendError("Player already on game");
 
+            playersService.StatePlayer(game.P1, PlayerStatus.Play);
+            playersService.StatePlayer(game.P2, PlayerStatus.Play);
             await Groups.AddToGroupAsync(game.P1.ConnectionId, game.GameId);
             await Groups.AddToGroupAsync(game.P2.ConnectionId, game.GameId);
             await Clients.Group(game.GameId).SendAsync("onGameSet", game);
@@ -104,7 +112,7 @@ namespace MainApi.Hubs
             var game = gamesService.Games.SingleOrDefault(g => g.GameId == gameId);
             if (game != null)
             {
-                var m = new Message { Id = Context.ConnectionId , Text = message };
+                var m = new Message { Id = Context.ConnectionId, Text = message };
                 await Clients.Group(game.GameId).SendAsync("onGameMessage", m);
             }
         }

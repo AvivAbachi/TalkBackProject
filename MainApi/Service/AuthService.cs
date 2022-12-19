@@ -7,7 +7,10 @@ namespace MainApi.Service
 {
     public class AuthService : IAuthService
     {
-        private readonly JwtSettings jwtSettings;
+        public static AuthService Instance { get; } = new();
+        private readonly JwtSettings? jwtSettings;
+
+        public AuthService() { }
         public AuthService(JwtSettings jwtSettings)
         {
             this.jwtSettings = jwtSettings ?? throw new ArgumentNullException();

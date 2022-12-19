@@ -14,8 +14,9 @@ var jwtSettings = builder.Configuration.GetSection(nameof(JwtSettings)).Get<JwtS
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<IGamesService, GamesService>();
+builder.Services.AddSingleton<IPlayersService, PlayersService>();
 builder.Services.AddSingleton<IAuthService>(new AuthService(jwtSettings));
-builder.Services.AddDbContext<UsersContext>(options => options.UseSqlServer(connectionString!));
+builder.Services.AddDbContext<PlayersContext>(options => options.UseSqlServer(connectionString!));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<Player>(options =>
     {
@@ -28,7 +29,7 @@ builder.Services.AddDefaultIdentity<Player>(options =>
             options.Password.RequireLowercase = false;
             options.Password.RequireUppercase = false;
         }
-    }).AddEntityFrameworkStores<UsersContext>();
+    }).AddEntityFrameworkStores<PlayersContext>();
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(options => options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -59,7 +60,7 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var ctx = scope.ServiceProvider.GetRequiredService<UsersContext>();
+    var ctx = scope.ServiceProvider.GetRequiredService<PlayersContext>();
     ctx.Database.EnsureDeleted();
     ctx.Database.EnsureCreated();
 }
