@@ -112,8 +112,8 @@ namespace MainApi.Hubs
             var game = gamesService.Games.SingleOrDefault(g => g.GameId == gameId);
             if (game != null)
             {
-                var m = new Message { Id = Context.ConnectionId, Text = message };
-                await Clients.Group(game.GameId).SendAsync("onGameMessage", m);
+                var message = new Message { Id = Context.ConnectionId, Text = message };
+                await Clients.Group(game.GameId).SendAsync("onGameMessage", message);
             }
         }
 
