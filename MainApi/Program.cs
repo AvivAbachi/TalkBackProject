@@ -79,6 +79,6 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHub<LobbyHub>("/hubs/lobby");
+app.MapHub<GameHub>("/hubs/game");
 
 app.Run();

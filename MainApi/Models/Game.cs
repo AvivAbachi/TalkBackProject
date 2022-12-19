@@ -8,7 +8,7 @@ namespace MainApi.Models
         public IPlayerBase? P1 { get; set; }
         public IPlayerBase? P2 { get; set; }
         public Mark[] Board { get; set; }
-         public GameStatus GameState { get; set; } = GameStatus.Wait;
+        public GameStatus GameState { get; set; } = GameStatus.Wait;
         public MarkEnum Turn { get; set; } = MarkEnum.X;
         public Game(string gameId, IPlayerBase player1, IPlayerBase player2)
         {

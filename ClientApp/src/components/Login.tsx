@@ -2,7 +2,7 @@ import { useState, FormEvent, memo } from 'react';
 import { FormErrorType, FormType } from '../types';
 import { playerEvent } from '../store/useStore';
 import { Error, Panel } from './base/';
-import { CardBody, Typography, Input, Button } from '@material-tailwind/react';
+import { CardBody, Input, Button } from '@material-tailwind/react';
 
 function Login() {
 	const [Waiting, setWaiting] = useState(false);
@@ -41,7 +41,7 @@ function Login() {
 	return (
 		<Panel
 			className='w-full max-w-md self-center'
-			title={isLogin ? 'Login ' : 'Register'}
+			title={isLogin ? 'Login ' : 'Sign up'}
 			center
 		>
 			<CardBody>
