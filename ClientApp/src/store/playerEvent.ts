@@ -2,7 +2,7 @@ import * as talkbackApi from '../api/talkbackApi';
 import { FormType, PlayerType } from '../types';
 import useStore from './useStore';
 
-const login = async (form: FormType, isLogin: boolean) => {
+const submitForm = async (form: FormType, isLogin: boolean) => {
 	try {
 		const res = await (isLogin ? talkbackApi.login(form) : talkbackApi.register(form));
 		useStore.setState((state) => ({ ...state, token: res.data }));
@@ -31,11 +31,14 @@ const refreshToken = () => {
 const logout = (error: any) => {
 	console.error(error);
 	localStorage.removeItem('accessToken');
-	useStore.setState(() => ({
+	useStore.setState((state) => ({
 		game: undefined,
 		token: undefined,
 		player: undefined,
+		error: undefined,
 		playersList: [],
+		chat: [],
+		connection: state.connection,
 	}));
 };
 
@@ -73,7 +76,7 @@ const playerStatus = () => {
 };
 
 const userEvent = {
-	login,
+	submitForm,
 	logout,
 	refreshToken,
 

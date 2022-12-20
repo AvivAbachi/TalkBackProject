@@ -1,7 +1,6 @@
 import create from 'zustand';
 import { mountStoreDevtool } from 'simple-zustand-devtools';
 import { GameType, MessageType, PlayerType } from '../types';
-
 import {
 	HttpTransportType,
 	HubConnection,
@@ -35,6 +34,10 @@ const useStore = create<TalkbackState>((set, get) => ({
 		.build(),
 }));
 
+if (process.env.NODE_ENV === 'development') {
+	mountStoreDevtool('TalkbackStore', useStore);
+}
+
 useStore.subscribe(async (state, prev) => {
 	if (state.token !== prev.token) {
 		if (state.token) {
@@ -45,13 +48,9 @@ useStore.subscribe(async (state, prev) => {
 	}
 });
 
-if (process.env.NODE_ENV === 'development') {
-	mountStoreDevtool('TalkbackStore', useStore);
-}
-
 export const setError = (error: string) => {
 	if (error) console.error(error);
-	useStore.setState(() => ({ error }), false);
+	useStore.setState((state) => ({ ...state, error }));
 };
 
 export const clearError = () => setError('');

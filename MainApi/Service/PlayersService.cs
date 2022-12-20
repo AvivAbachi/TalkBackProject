@@ -28,12 +28,5 @@ namespace MainApi.Service
             if (player != null) Players.Remove(player);
             return player;
         }
-
-        public IPlayerBase? StatePlayer(IPlayerBase player, PlayerStatus status)
-        {
-            if (player != null) player.Status = status;
-            return player;
-        }
-
     }
 }

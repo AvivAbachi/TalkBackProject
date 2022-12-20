@@ -1,4 +1,4 @@
-import { GameType } from '../types';
+import { GameType, MessageType } from '../types';
 import useStore from './useStore';
 
 export const onSetGame = (game: GameType) => {
@@ -9,7 +9,7 @@ export const onGameClose = () => {
 	useStore.setState((state) => ({ ...state, game: undefined, chat: [] }));
 };
 
-export const onGameMessage = (message: any) => {
+export const onGameMessage = (message: MessageType) => {
 	useStore.setState((state) => ({
 		...state,
 		chat: [

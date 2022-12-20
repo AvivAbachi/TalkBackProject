@@ -47,16 +47,16 @@ function Chat() {
 						value={message}
 						onChange={(e) => setMessage(e.target.value)}
 					/>
-					<Button
-						type='submit'
-						variant='gradient'
-						className='text-md ml-4 flex h-11 items-center'
-					>
-						Send
-						<span>
-							<IconSend className='mx-2 h-5 w-5 rotate-90' />
-						</span>
-					</Button>
+					<div>
+						<Button
+							type='submit'
+							variant='gradient'
+							className='text-md ml-4 flex h-11 items-center'
+						>
+							Send
+							<IconSend className='ml-1 h-5 w-5 rotate-90' />
+						</Button>
+					</div>
 				</form>
 			</CardFooter>
 		</Panel>

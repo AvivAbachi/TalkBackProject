@@ -34,6 +34,7 @@ export type FormErrorType = {
 };
 
 export type MessageType = {
-	send: boolean;
+	send?: boolean;
+	id?: string;
 	text: string;
 };

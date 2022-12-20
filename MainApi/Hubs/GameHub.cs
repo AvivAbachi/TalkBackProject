@@ -23,17 +23,18 @@ namespace MainApi.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            IPlayerBase? player = await userManager.FindByIdAsync(Context.User.Identity.Name);
+            var player = await userManager.FindByIdAsync(Context.User?.Identity?.Name!) as IPlayerBase;
 
             if (player == null) await SendError("Unauthorized");
 
-            player.ConnectionId = Context.ConnectionId;
-            player = playersService.AddPlayer(player);
+            player = playersService.AddPlayer(player!);
 
             if (player == null) await SendError("Player already connected");
 
+            player!.ConnectionId = Context.ConnectionId;
+            var pl = new { player.ConnectionId, player.Status, player.UserName };
             await Clients.Others.SendAsync("onPlayerLogin", player);
-            await Clients.Caller.SendAsync("onLogin", new { player.Id, player.ConnectionId, player.Status, player.UserName }, playersService.Players);
+            await Clients.Caller.SendAsync("onLogin", pl, playersService.Players);
             await base.OnConnectedAsync();
         }
 
@@ -42,11 +43,15 @@ namespace MainApi.Hubs
             var player = playersService.RemovePlayer(Context.ConnectionId);
             if (player != null)
             {
-                var game = gamesService.LeaveGame(Context.ConnectionId);
+                var game = gamesService.RemoveGame(Context.ConnectionId);
                 if (game != null)
                 {
-                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, game.GameId);
-                    await Clients.Group(game.GameId).SendAsync("onGameSet", game);
+                    await Clients.Group(game.GameId).SendAsync("onGameClose", game);
+                    await Clients.OthersInGroup(game.GameId).SendAsync("onError", "Player leave the game");
+                    await Groups.RemoveFromGroupAsync(game.P1.ConnectionId, game.GameId);
+                    await Groups.RemoveFromGroupAsync(game.P2.ConnectionId, game.GameId);
+                    var stayPlayer = Context.ConnectionId == game.P1.ConnectionId ? game.P2 : game.P1;
+                    await Clients.All.SendAsync("onPlayerState", stayPlayer);
                 }
                 await Clients.All.SendAsync("onPlayerLogout", player.ConnectionId);
             }
@@ -56,7 +61,8 @@ namespace MainApi.Hubs
         public async Task PlayerState()
         {
             var player = playersService.GetPlayer(Context.ConnectionId);
-            if (player != null) player.Status = player.Status == PlayerStatus.Idle ? PlayerStatus.Ready : PlayerStatus.Idle;
+            var status = player?.Status == PlayerStatus.Idle ? PlayerStatus.Ready : PlayerStatus.Idle;
+            if (player != null) player.Status = status;
             await Clients.All.SendAsync("onPlayerState", player);
         }
 
@@ -64,13 +70,14 @@ namespace MainApi.Hubs
         {
             var p1 = playersService.GetPlayer(Context.ConnectionId);
             var p2 = playersService.GetPlayer(p2Id);
-            var game = gamesService.CrateGame(p1, p2);
+
+            if (p1 == null || p2 == null) await SendError("Player not found");
+
+            var game = gamesService.CrateGame(p1!, p2!);
 
             if (game == null) await SendError("Player already on game");
 
-            playersService.StatePlayer(game.P1, PlayerStatus.Play);
-            playersService.StatePlayer(game.P2, PlayerStatus.Play);
-            await Groups.AddToGroupAsync(game.P1.ConnectionId, game.GameId);
+            await Groups.AddToGroupAsync(game!.P1.ConnectionId, game.GameId);
             await Groups.AddToGroupAsync(game.P2.ConnectionId, game.GameId);
             await Clients.Group(game.GameId).SendAsync("onGameSet", game);
             await Clients.All.SendAsync("onPlayerState", game.P1);
@@ -79,13 +86,15 @@ namespace MainApi.Hubs
 
         public async Task GameLeave()
         {
-            var game = gamesService.LeaveGame(Context.ConnectionId);
+            var game = gamesService.RemoveGame(Context.ConnectionId);
             if (game != null)
             {
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, game.GameId);
-                await Clients.Group(game.GameId).SendAsync("onGameSet", game);
-                await Clients.Caller.SendAsync("onGameClose");
-                await PlayerState();
+                await Clients.Group(game.GameId).SendAsync("onGameClose", game);
+                await Clients.OthersInGroup(game.GameId).SendAsync("onError", "Player leave the game");
+                await Groups.RemoveFromGroupAsync(game.P1.ConnectionId, game.GameId);
+                await Groups.RemoveFromGroupAsync(game.P2.ConnectionId, game.GameId);
+                await Clients.All.SendAsync("onPlayerState", game.P1);
+                await Clients.All.SendAsync("onPlayerState", game.P2);
             }
         }
 
@@ -102,9 +111,12 @@ namespace MainApi.Hubs
         public async Task GameTurn(string gameId, int i)
         {
             var game = gamesService.Games.SingleOrDefault(g => g.GameId == gameId);
-            var res = game?.PlayerTurn(Context.ConnectionId, i);
-            if (res == true) await Clients.Group(game!.GameId).SendAsync("onGameSet", game);
-            else await SendError("Not vaild move!");
+            if (game != null)
+            {
+                var succces = game.PlayerTurn(Context.ConnectionId, i);
+                if (!succces) await Clients.Caller.SendAsync("onError", "Not vaild move!");
+                await Clients.Group(game!.GameId).SendAsync("onGameSet", game);
+            }
         }
 
         public async Task GameMessage(string gameId, string message)
@@ -112,8 +124,8 @@ namespace MainApi.Hubs
             var game = gamesService.Games.SingleOrDefault(g => g.GameId == gameId);
             if (game != null)
             {
-                var message = new Message { Id = Context.ConnectionId, Text = message };
-                await Clients.Group(game.GameId).SendAsync("onGameMessage", message);
+                var m = new Message { Id = Context.ConnectionId, Text = message };
+                await Clients.Group(game.GameId).SendAsync("onGameMessage", m);
             }
         }
 

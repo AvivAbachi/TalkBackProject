@@ -21,14 +21,14 @@ function App() {
 	useEffect(() => {
 		if (!eventLoad.current) {
 			eventLoad.current = true;
-			connection?.on('onLogin', playerEvent.onLogin);
-			connection?.on('onPlayerLogin', playerEvent.onPlayerLogin);
-			connection?.on('onPlayerLogout', playerEvent.onPlayerLogout);
-			connection?.on('onPlayerState', playerEvent.onPlayerState);
-			connection?.on('onGameSet', gameEvent.onSetGame);
-			connection?.on('onGameClose', gameEvent.onGameClose);
-			connection?.on('onGameMessage', gameEvent.onGameMessage);
-			connection?.on('onError', setError);
+			connection.on('onLogin', playerEvent.onLogin);
+			connection.on('onPlayerLogin', playerEvent.onPlayerLogin);
+			connection.on('onPlayerLogout', playerEvent.onPlayerLogout);
+			connection.on('onPlayerState', playerEvent.onPlayerState);
+			connection.on('onGameSet', gameEvent.onSetGame);
+			connection.on('onGameClose', gameEvent.onGameClose);
+			connection.on('onGameMessage', gameEvent.onGameMessage);
+			connection.on('onError', setError);
 		}
 	}, [connection]);
 

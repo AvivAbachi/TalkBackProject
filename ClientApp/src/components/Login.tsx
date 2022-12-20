@@ -24,7 +24,7 @@ function Login() {
 		setWaiting(true);
 		setFormError({ UserName: [], Password: [], Server: [] });
 
-		await playerEvent.login(formValue, isLogin).catch((err) => setFormError(err));
+		await playerEvent.submitForm(formValue, isLogin).catch((err) => setFormError(err));
 
 		setWaiting(false);
 	};
@@ -40,7 +40,7 @@ function Login() {
 
 	return (
 		<Panel
-			className='w-full max-w-md self-center'
+			className='mx-auto w-full max-w-md self-center'
 			title={isLogin ? 'Login ' : 'Sign up'}
 			center
 		>

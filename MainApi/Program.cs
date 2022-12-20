@@ -17,7 +17,6 @@ builder.Services.AddSingleton<IGamesService, GamesService>();
 builder.Services.AddSingleton<IPlayersService, PlayersService>();
 builder.Services.AddSingleton<IAuthService>(new AuthService(jwtSettings));
 builder.Services.AddDbContext<PlayersContext>(options => options.UseSqlServer(connectionString!));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<Player>(options =>
     {
         options.Password.RequireNonAlphanumeric = false;
@@ -36,8 +35,8 @@ builder.Services.AddAuthentication(options => options.DefaultAuthenticateScheme 
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidAudience = jwtSettings.Audience,
-            ValidIssuer = jwtSettings.Issuer,
+            ValidateAudience = false,
+            ValidateIssuer = false,
             IssuerSigningKey = jwtSettings.SigningKey,
         };
         options.Events = new JwtBearerEvents

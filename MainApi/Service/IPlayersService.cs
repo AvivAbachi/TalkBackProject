@@ -9,6 +9,5 @@ namespace MainApi.Service
         IPlayerBase? AddPlayer(IPlayerBase player);
         IPlayerBase? GetPlayer(string connectionId);
         IPlayerBase? RemovePlayer(string connectionId);
-        IPlayerBase? StatePlayer(IPlayerBase player, PlayerStatus status);
     }
 }

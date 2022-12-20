@@ -13,7 +13,9 @@ function ErrorDialog() {
 	return (
 		<Dialog open={!!error} handler={clearError}>
 			<DialogHeader>Error!</DialogHeader>
-			<DialogBody>{error}</DialogBody>
+			<DialogBody>
+				<span>{error}</span>
+			</DialogBody>
 			<DialogFooter>
 				<Button variant='gradient' color='red' onClick={clearError}>
 					Close
