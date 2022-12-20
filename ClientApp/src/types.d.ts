@@ -30,7 +30,6 @@ export type FormType = {
 export type FormErrorType = {
 	UserName: string[];
 	Password: string[];
-	Server: string[];
 };
 
 export type MessageType = {

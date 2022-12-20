@@ -16,13 +16,12 @@ function Login() {
 	const [formError, setFormError] = useState<FormErrorType>({
 		UserName: [],
 		Password: [],
-		Server: [],
 	});
 
 	const handleSubmit = async (event: FormEvent) => {
 		event.preventDefault();
 		setWaiting(true);
-		setFormError({ UserName: [], Password: [], Server: [] });
+		setFormError({ UserName: [], Password: [] });
 
 		await playerEvent.submitForm(formValue, isLogin).catch((err) => setFormError(err));
 
@@ -31,7 +30,7 @@ function Login() {
 
 	const handelSwitch = () => {
 		setIsLogin(!isLogin);
-		setFormError({ UserName: [], Password: [], Server: [] });
+		setFormError({ UserName: [], Password: [] });
 	};
 
 	const onChange = (e: any) => {
@@ -74,9 +73,6 @@ function Login() {
 					<Button color='light-blue' disabled={Waiting} type='submit'>
 						{isLogin ? 'Log In' : 'Sign up'}
 					</Button>
-					{formError.Server?.map((error, i) => (
-						<Error key={i} error={error} />
-					))}
 					<div className='flex justify-center'>
 						{!isLogin ? 'Already have an account?' : "Don't have an account?"}
 						<button

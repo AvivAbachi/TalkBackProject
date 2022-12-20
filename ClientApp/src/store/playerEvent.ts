@@ -1,6 +1,6 @@
 import * as talkbackApi from '../api/talkbackApi';
 import { FormType, PlayerType } from '../types';
-import useStore from './useStore';
+import useStore, { setError } from './useStore';
 
 const submitForm = async (form: FormType, isLogin: boolean) => {
 	try {
@@ -12,8 +12,7 @@ const submitForm = async (form: FormType, isLogin: boolean) => {
 			const data = err.response.data;
 			throw !!data?.errors ? data?.errors : data;
 		} else {
-			const error = { Server: [err?.message] };
-			throw error;
+			setError(err?.message);
 		}
 	}
 };

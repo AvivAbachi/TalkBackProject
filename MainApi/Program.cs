@@ -8,7 +8,8 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration["ConnectionStrings:DefaultConnection"];
+var connectionDB = builder.Configuration["ConnectionStrings:DB"];
+var connectionClient = builder.Configuration["ConnectionStrings:Client"];
 var jwtSettings = builder.Configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>()!;
 
 builder.Services.AddControllers();
@@ -16,7 +17,7 @@ builder.Services.AddSignalR();
 builder.Services.AddSingleton<IGamesService, GamesService>();
 builder.Services.AddSingleton<IPlayersService, PlayersService>();
 builder.Services.AddSingleton<IAuthService>(new AuthService(jwtSettings));
-builder.Services.AddDbContext<PlayersContext>(options => options.UseSqlServer(connectionString!));
+builder.Services.AddDbContext<PlayersContext>(options => options.UseSqlServer(connectionDB!));
 builder.Services.AddDefaultIdentity<Player>(options =>
     {
         options.Password.RequireNonAlphanumeric = false;
@@ -53,7 +54,7 @@ builder.Services.AddAuthentication(options => options.DefaultAuthenticateScheme 
             }
         };
     });
-builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.WithOrigins("http://localhost:3000")
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.WithOrigins(connectionClient!)
                 .AllowCredentials().AllowAnyHeader().AllowAnyMethod()));
 var app = builder.Build();
 
