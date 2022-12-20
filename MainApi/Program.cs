@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var connectionDB = builder.Configuration["ConnectionStrings:DB"];
 var connectionClient = builder.Configuration["ConnectionStrings:Client"];
-var jwtSettings = builder.Configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>() ?? throw new NullReferenceException("jwtSettings");
+var jwtSettings = builder.Configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>()!;
 
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
@@ -65,7 +65,7 @@ using (var scope = app.Services.CreateScope())
     ctx.Database.EnsureCreated();
 }
 
-if (app.Environment.IsProduction())
+if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
 }
