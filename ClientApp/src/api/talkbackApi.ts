@@ -7,7 +7,6 @@ const talkbackApi = axios.create({
 		'Access-Control-Allow-Origin': '*',
 		'Access-Control-Allow-Methods': 'GET,POST',
 	},
-	timeout: 3000,
 });
 
 export const login = async (form: FormType) => {

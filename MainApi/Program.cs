@@ -9,15 +9,20 @@ using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionDB = builder.Configuration["ConnectionStrings:DB"];
-var connectionClient = builder.Configuration["ConnectionStrings:Client"];
 var jwtSettings = builder.Configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>()!;
 
 builder.Services.AddControllers();
+
 builder.Services.AddSignalR();
+
 builder.Services.AddSingleton<IGamesService, GamesService>();
+
 builder.Services.AddSingleton<IPlayersService, PlayersService>();
+
 builder.Services.AddSingleton<IAuthService>(new AuthService(jwtSettings));
+
 builder.Services.AddDbContext<PlayersContext>(options => options.UseSqlServer(connectionDB!));
+
 builder.Services.AddDefaultIdentity<Player>(options =>
     {
         options.Password.RequireNonAlphanumeric = false;
@@ -30,7 +35,9 @@ builder.Services.AddDefaultIdentity<Player>(options =>
             options.Password.RequireUppercase = false;
         }
     }).AddEntityFrameworkStores<PlayersContext>();
+
 builder.Services.AddAuthorization();
+
 builder.Services.AddAuthentication(options => options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -54,8 +61,10 @@ builder.Services.AddAuthentication(options => options.DefaultAuthenticateScheme 
             }
         };
     });
-builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.WithOrigins(connectionClient!)
-                .AllowCredentials().AllowAnyHeader().AllowAnyMethod()));
+
+builder.Services.AddCors(options => options.AddPolicy("dev", policy => policy.WithOrigins("http://localhost:3000")
+                   .AllowCredentials().AllowAnyHeader().AllowAnyMethod()));
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -67,7 +76,7 @@ using (var scope = app.Services.CreateScope())
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage();
+    app.UseCors("dev");
 }
 else
 {
@@ -75,7 +84,6 @@ else
 }
 
 app.UseHttpsRedirection();
-app.UseCors();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
