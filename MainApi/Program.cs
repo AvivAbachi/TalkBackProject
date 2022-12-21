@@ -61,7 +61,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var ctx = scope.ServiceProvider.GetRequiredService<PlayersContext>();
-    ctx.Database.EnsureDeleted();
+    if (app.Environment.IsDevelopment()) ctx.Database.EnsureDeleted();
     ctx.Database.EnsureCreated();
 }
 

@@ -1,7 +1,9 @@
 {
-  "dependencies": {
-    "secrets1": {
-      "type": "secrets.user"
-    }
-  }
+	"dependencies": {
+		"mssql1": {
+			"type": "mssql.local",
+			"connectionId": "ConnectionStrings:DB",
+			"dynamicId": null
+		}
+	}
 }

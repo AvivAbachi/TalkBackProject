@@ -19,6 +19,11 @@ namespace MainApi.Controllers
             this.userManager = userManager;
             this.signInManager = signInManager;
         }
+        [HttpGet("/")]
+        public ActionResult Get()
+        {
+            return Ok("OK");
+        }
 
         [HttpPost("/Login")]
         public async Task<ActionResult<string>> Login([FromBody] LoginModel model)
